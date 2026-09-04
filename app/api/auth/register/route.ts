@@ -23,9 +23,10 @@ export async function POST(request: Request) {
         const body = await request.json()
         const { email, password, name, role, departmentId } = registerSchema.parse(body)
 
-        const { rows: existingRows } = await query('SELECT id FROM "User" WHERE email = $1', [email])
+        const { rows: existingRows } = await query('SELECT id, "emailVerified" FROM "User" WHERE email = $1', [email])
+        const existing = existingRows[0]
 
-        if (existingRows.length > 0) {
+        if (existing?.emailVerified) {
             return NextResponse.json({ error: 'User already exists' }, { status: 400 })
         }
 
@@ -34,11 +35,21 @@ export async function POST(request: Request) {
         const hashedOtp = await hashPassword(otpCode)
         const otpExpiresAt = new Date(Date.now() + OTP_TTL_MS)
 
-        await query(
-            `INSERT INTO "User" (id, email, password, name, role, "departmentId", "otpCode", "otpExpiresAt", "emailVerified")
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NULL)`,
-            [randomUUID(), email, hashedPassword, name, role || Role.STUDENT, departmentId ?? null, hashedOtp, otpExpiresAt]
-        )
+        if (existing) {
+            // Previous signup never got verified (e.g. the OTP email failed to
+            // send) — treat this as a retry instead of a hard "already exists".
+            await query(
+                `UPDATE "User" SET password = $1, name = $2, role = $3, "departmentId" = $4, "otpCode" = $5, "otpExpiresAt" = $6
+                 WHERE id = $7`,
+                [hashedPassword, name, role || Role.STUDENT, departmentId ?? null, hashedOtp, otpExpiresAt, existing.id]
+            )
+        } else {
+            await query(
+                `INSERT INTO "User" (id, email, password, name, role, "departmentId", "otpCode", "otpExpiresAt", "emailVerified")
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NULL)`,
+                [randomUUID(), email, hashedPassword, name, role || Role.STUDENT, departmentId ?? null, hashedOtp, otpExpiresAt]
+            )
+        }
 
         await sendOtpEmail(email, otpCode)
 
