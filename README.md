@@ -11,7 +11,7 @@ A full-stack complaint management system for GIKI students, faculty, and staff.
 
 ## Tech Stack
 - **Frontend**: Next.js 15, React, Vanilla CSS
-- **Backend**: Next.js API Routes
+- **Backend**: Next.js API Routes  
 - **Database**: SQLite, Prisma ORM 
 - **Auth**: JWT, Bcrypt
 
