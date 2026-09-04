@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+import { query } from '@/lib/db'
 import { getUserFromToken } from '@/lib/auth'
 import { cookies } from 'next/headers'
+import { randomUUID } from 'crypto'
 import { z } from 'zod'
 
 const commentSchema = z.object({
@@ -23,10 +24,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         const { content } = commentSchema.parse(body)
 
         // Verify complaint exists and user has access
-        const complaint = await prisma.complaint.findUnique({
-            where: { id },
-            include: { complainant: true }
-        })
+        const { rows: complaintRows } = await query('SELECT * FROM "Complaint" WHERE id = $1', [id])
+        const complaint = complaintRows[0]
 
         if (!complaint) {
             return NextResponse.json({ error: 'Complaint not found' }, { status: 404 })
@@ -42,18 +41,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
             return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
         }
 
-        const comment = await prisma.comment.create({
-            data: {
-                content,
-                complaintId: id,
-                authorId: user.id,
-            },
-            include: {
-                author: {
-                    select: { name: true, role: true }
-                }
-            }
-        })
+        const { rows } = await query(
+            `WITH ins AS (
+                INSERT INTO "Comment" (id, content, "complaintId", "authorId")
+                VALUES ($1, $2, $3, $4) RETURNING *
+             )
+             SELECT ins.*, jsonb_build_object('name', u.name, 'role', u.role) AS author
+             FROM ins JOIN "User" u ON u.id = ins."authorId"`,
+            [randomUUID(), content, id, user.id]
+        )
+        const comment = rows[0]
 
         return NextResponse.json({ comment })
     } catch (error) {

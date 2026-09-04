@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+import { query } from '@/lib/db'
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
@@ -9,21 +9,17 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Missing token' }, { status: 400 })
     }
 
-    const user = await prisma.user.findUnique({
-        where: { verificationToken: token },
-    })
+    const { rows } = await query('SELECT id FROM "User" WHERE "verificationToken" = $1', [token])
+    const user = rows[0]
 
     if (!user) {
         return NextResponse.json({ error: 'Invalid or expired token' }, { status: 400 })
     }
 
-    await prisma.user.update({
-        where: { id: user.id },
-        data: {
-            emailVerified: new Date(),
-            verificationToken: null, // Consume the token
-        },
-    })
+    await query(
+        'UPDATE "User" SET "emailVerified" = now(), "verificationToken" = NULL WHERE id = $1',
+        [user.id]
+    )
 
     // Redirect to login with success message
     return NextResponse.redirect(new URL('/login?verified=true', request.url))

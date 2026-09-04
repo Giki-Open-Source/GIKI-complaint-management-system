@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+import { query } from '@/lib/db'
 import { comparePassword, signToken } from '@/lib/auth'
 import { z } from 'zod'
 
@@ -13,9 +13,8 @@ export async function POST(request: Request) {
         const body = await request.json()
         const { email, password } = loginSchema.parse(body)
 
-        const user = await prisma.user.findUnique({
-            where: { email },
-        })
+        const { rows } = await query('SELECT * FROM "User" WHERE email = $1', [email])
+        const user = rows[0]
 
         if (!user || !(await comparePassword(password, user.password))) {
             return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })

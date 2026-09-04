@@ -2,7 +2,7 @@
 
 import { cookies } from 'next/headers'
 import { getUserFromToken } from '@/lib/auth'
-import { prisma } from '@/lib/db'
+import { query } from '@/lib/db'
 import Link from 'next/link'
 import DashboardControls from './controls'
 
@@ -16,21 +16,31 @@ export default async function DepartmentDashboard({ searchParams }: { searchPara
         return <div>Unauthorized</div>
     }
 
-    const whereClause: any = {}
+    const conditions: string[] = []
+    const values: unknown[] = []
     if (user.role === 'DEPT_OFFICER') {
-        whereClause.assignedDeptId = user.departmentId
+        values.push(user.departmentId)
+        conditions.push(`c."assignedDeptId" = $${values.length}`)
     }
     if (resolvedParams.status) {
-        whereClause.status = resolvedParams.status
+        values.push(resolvedParams.status)
+        conditions.push(`c.status = $${values.length}`)
     }
+    const whereSql = conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''
+    const orderDirection = resolvedParams.sort === 'oldest' ? 'ASC' : 'DESC'
 
-    const orderBy = resolvedParams.sort === 'oldest' ? { createdAt: 'asc' } : { createdAt: 'desc' }
-
-    const complaints = await prisma.complaint.findMany({
-        where: whereClause,
-        orderBy: orderBy as any,
-        include: { complainant: true }
-    })
+    const { rows: complaintRows } = await query(
+        `SELECT c.*, cu.name AS "complainantName"
+         FROM "Complaint" c
+         JOIN "User" cu ON cu.id = c."complainantId"
+         ${whereSql}
+         ORDER BY c."createdAt" ${orderDirection}`,
+        values
+    )
+    const complaints = complaintRows.map((c: any) => ({
+        ...c,
+        complainant: { name: c.complainantName },
+    }))
 
     // Calculate stats
     const total = complaints.length

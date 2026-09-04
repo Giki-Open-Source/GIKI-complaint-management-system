@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
-import { hashPassword, signToken } from '@/lib/auth'
+import { query } from '@/lib/db'
+import { hashPassword } from '@/lib/auth'
+import { randomUUID } from 'crypto'
 import { z } from 'zod'
 import { Role } from '@/lib/enums'
 
@@ -19,28 +20,20 @@ export async function POST(request: Request) {
         const body = await request.json()
         const { email, password, name, role, departmentId } = registerSchema.parse(body)
 
-        const existingUser = await prisma.user.findUnique({
-            where: { email },
-        })
+        const { rows: existingRows } = await query('SELECT id FROM "User" WHERE email = $1', [email])
 
-        if (existingUser) {
+        if (existingRows.length > 0) {
             return NextResponse.json({ error: 'User already exists' }, { status: 400 })
         }
 
         const hashedPassword = await hashPassword(password)
         const verificationToken = crypto.randomUUID()
 
-        const user = await prisma.user.create({
-            data: {
-                email,
-                password: hashedPassword,
-                name,
-                role: role || Role.STUDENT,
-                departmentId,
-                verificationToken,
-                emailVerified: null // Explicitly null
-            },
-        })
+        await query(
+            `INSERT INTO "User" (id, email, password, name, role, "departmentId", "verificationToken", "emailVerified")
+             VALUES ($1, $2, $3, $4, $5, $6, $7, NULL)`,
+            [randomUUID(), email, hashedPassword, name, role || Role.STUDENT, departmentId ?? null, verificationToken]
+        )
 
         // MOCK EMAIL SENDING
         const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/auth/verify-email?token=${verificationToken}`

@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+import { query } from '@/lib/db'
 import { getUserFromToken, hashPassword } from '@/lib/auth'
 import { cookies } from 'next/headers'
+import { randomUUID } from 'crypto'
 import { z } from 'zod'
 import { Role } from '@/lib/enums'
 
@@ -26,28 +27,22 @@ export async function POST(request: Request) {
         const body = await request.json()
         const data = createUserSchema.parse(body)
 
-        const existingUser = await prisma.user.findUnique({
-            where: { email: data.email }
-        })
+        const { rows: existingRows } = await query('SELECT id FROM "User" WHERE email = $1', [data.email])
 
-        if (existingUser) {
+        if (existingRows.length > 0) {
             return NextResponse.json({ error: 'User already exists' }, { status: 400 })
         }
 
         const hashedPassword = await hashPassword(data.password)
 
-        const newUser = await prisma.user.create({
-            data: {
-                name: data.name,
-                email: data.email,
-                password: hashedPassword,
-                role: data.role,
-                departmentId: data.departmentId || null,
-            }
-        })
+        const { rows } = await query(
+            `INSERT INTO "User" (id, name, email, password, role, "departmentId")
+             VALUES ($1, $2, $3, $4, $5, $6)
+             RETURNING id, name, email, role, "departmentId", "emailVerified", "verificationToken", "createdAt", "updatedAt"`,
+            [randomUUID(), data.name, data.email, hashedPassword, data.role, data.departmentId || null]
+        )
 
-        const { password, ...userWithoutPassword } = newUser
-        return NextResponse.json({ user: userWithoutPassword })
+        return NextResponse.json({ user: rows[0] })
     } catch (error) {
         if (error instanceof z.ZodError) {
             return NextResponse.json({ error: error.issues }, { status: 400 })
