@@ -12,11 +12,6 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false)
     const router = useRouter()
 
-    // In Next.js 15+, searchParams in pages are async, but in client components we can use useSearchParams hook
-    // However, this is a client component, so we should use useSearchParams
-    const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null
-    const verified = searchParams?.get('verified')
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setError('')
@@ -76,20 +71,6 @@ export default function LoginPage() {
                         border: '1px solid rgba(239, 68, 68, 0.2)'
                     }}>
                         {error}
-                    </div>
-                )}
-
-                {verified && (
-                    <div style={{
-                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                        color: '#16a34a',
-                        padding: '0.75rem',
-                        borderRadius: 'var(--radius)',
-                        marginBottom: '1.5rem',
-                        fontSize: '0.875rem',
-                        border: '1px solid rgba(34, 197, 94, 0.2)'
-                    }}>
-                        Email verified successfully! You can now login.
                     </div>
                 )}
 

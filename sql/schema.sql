@@ -17,8 +17,14 @@ CREATE TABLE IF NOT EXISTS "User" (
     "createdAt"        TIMESTAMPTZ NOT NULL DEFAULT now(),
     "updatedAt"        TIMESTAMPTZ NOT NULL DEFAULT now(),
     "emailVerified"    TIMESTAMPTZ,
-    "verificationToken" TEXT UNIQUE
+    "otpCode"          TEXT,
+    "otpExpiresAt"     TIMESTAMPTZ
 );
+
+-- Migrating from the old link-based verification flow to OTP codes.
+ALTER TABLE "User" DROP COLUMN IF EXISTS "verificationToken";
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "otpCode" TEXT;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "otpExpiresAt" TIMESTAMPTZ;
 
 CREATE TABLE IF NOT EXISTS "Complaint" (
     id                  TEXT PRIMARY KEY,
