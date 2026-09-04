@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     } catch (error) {
         console.error('Registration Error:', error)
         if (error instanceof z.ZodError) {
-            return NextResponse.json({ error: (error as any).errors }, { status: 400 })
+            return NextResponse.json({ error: error.issues }, { status: 400 })
         }
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
