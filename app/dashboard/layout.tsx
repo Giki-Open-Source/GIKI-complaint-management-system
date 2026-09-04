@@ -1,5 +1,6 @@
 import { ReactNode } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { cookies } from 'next/headers'
 import { getUserFromToken } from '@/lib/auth'
 import styles from './dashboard.module.css'
@@ -17,7 +18,10 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
     const sidebarContent = (
         <>
-            <div className={styles.logo}>GIKOmplain</div>
+            <div className={styles.logo}>
+                <Image src="/giki-logo.png" alt="GIKI logo" width={28} height={28} className={styles.logoImg} />
+                GIKomplain
+            </div>
             <nav className={styles.nav}>
                 <Link href="/dashboard" className={styles.navItem}>Overview</Link>
 
