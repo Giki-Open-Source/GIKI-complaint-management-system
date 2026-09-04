@@ -1,14 +1,17 @@
 import { NextResponse } from 'next/server'
 import { query } from '@/lib/db'
 import { hashPassword } from '@/lib/auth'
+import { generateOtp, OTP_TTL_MS } from '@/lib/otp'
+import { sendOtpEmail } from '@/lib/email'
 import { randomUUID } from 'crypto'
 import { z } from 'zod'
 import { Role } from '@/lib/enums'
 
 const registerSchema = z.object({
-    email: z.string().email().refine(email => email.endsWith('@giki.edu.pk'), {
-        message: 'Only @giki.edu.pk emails are allowed'
-    }),
+    email: z.string().email().refine(
+        email => email.endsWith('@giki.edu.pk') || email === process.env.TEST_ALLOWED_EMAIL,
+        { message: 'Only @giki.edu.pk emails are allowed' }
+    ),
     password: z.string().min(6),
     name: z.string().min(2),
     role: z.nativeEnum(Role).optional(),
@@ -27,25 +30,21 @@ export async function POST(request: Request) {
         }
 
         const hashedPassword = await hashPassword(password)
-        const verificationToken = crypto.randomUUID()
+        const otpCode = generateOtp()
+        const hashedOtp = await hashPassword(otpCode)
+        const otpExpiresAt = new Date(Date.now() + OTP_TTL_MS)
 
         await query(
-            `INSERT INTO "User" (id, email, password, name, role, "departmentId", "verificationToken", "emailVerified")
-             VALUES ($1, $2, $3, $4, $5, $6, $7, NULL)`,
-            [randomUUID(), email, hashedPassword, name, role || Role.STUDENT, departmentId ?? null, verificationToken]
+            `INSERT INTO "User" (id, email, password, name, role, "departmentId", "otpCode", "otpExpiresAt", "emailVerified")
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NULL)`,
+            [randomUUID(), email, hashedPassword, name, role || Role.STUDENT, departmentId ?? null, hashedOtp, otpExpiresAt]
         )
 
-        // MOCK EMAIL SENDING
-        const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/auth/verify-email?token=${verificationToken}`
-        console.log('----------------------------------------------------------------')
-        console.log('📧 MOCK EMAIL: Verify your account')
-        console.log(`To: ${email}`)
-        console.log(`Link: ${verificationUrl}`)
-        console.log('----------------------------------------------------------------')
+        await sendOtpEmail(email, otpCode)
 
-        // Do NOT log the user in. Return success message.
+        // Do NOT log the user in yet — they still need to verify the OTP.
         return NextResponse.json({
-            message: 'Account created successfully. Please check your email to verify your account.'
+            message: 'Account created. Check your email for a verification code.'
         })
     } catch (error) {
         console.error('Registration Error:', error)

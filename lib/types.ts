@@ -8,7 +8,8 @@ export interface User {
     createdAt: Date
     updatedAt: Date
     emailVerified: Date | null
-    verificationToken: string | null
+    otpCode: string | null
+    otpExpiresAt: Date | null
 }
 
 export type SafeUser = Omit<User, 'password'>
