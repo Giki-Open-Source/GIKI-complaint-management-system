@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { assignComplaint } from './actions'
-import { User, Department } from '@prisma/client'
+import { User, Department } from '@/lib/types'
 import { UserPlus, X } from 'lucide-react'
 
 interface AssignmentModalProps {

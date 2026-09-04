@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: giki-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: giki
+      POSTGRES_PASSWORD: giki
+      POSTGRES_DB: giki_complaints
+    ports:
+      - "5434:5432"
+    volumes:
+      - giki_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U giki -d giki_complaints"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  giki_pgdata:

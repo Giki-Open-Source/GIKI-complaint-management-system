@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers'
 import { getUserFromToken } from '@/lib/auth'
-import { prisma } from '@/lib/db'
+import { query } from '@/lib/db'
 import UserManagement from './user-management'
 
 export default async function UserManagementPage() {
@@ -12,15 +12,19 @@ export default async function UserManagementPage() {
         return <div>Unauthorized</div>
     }
 
-    const [users, departments] = await Promise.all([
-        prisma.user.findMany({
-            orderBy: { name: 'asc' },
-            include: { department: true }
-        }),
-        prisma.department.findMany({
-            orderBy: { name: 'asc' }
-        })
+    const [{ rows: userRows }, { rows: departments }] = await Promise.all([
+        query(
+            `SELECT u.id, u.name, u.email, u.role, u."departmentId", d.name AS "departmentName"
+             FROM "User" u
+             LEFT JOIN "Department" d ON d.id = u."departmentId"
+             ORDER BY u.name ASC`
+        ),
+        query('SELECT * FROM "Department" ORDER BY name ASC')
     ])
+    const users = userRows.map((u: any) => ({
+        ...u,
+        department: u.departmentName ? { name: u.departmentName } : null,
+    }))
 
     return (
         <div>

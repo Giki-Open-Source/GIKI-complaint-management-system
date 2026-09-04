@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers'
 import { getUserFromToken } from '@/lib/auth'
-import { prisma } from '@/lib/db'
+import { query } from '@/lib/db'
 import Link from 'next/link'
 
 
@@ -11,10 +11,10 @@ export default async function MyComplaintsPage() {
 
     if (!user) return null
 
-    const complaints = await prisma.complaint.findMany({
-        where: { complainantId: user.id },
-        orderBy: { createdAt: 'desc' },
-    })
+    const { rows: complaints } = await query(
+        'SELECT * FROM "Complaint" WHERE "complainantId" = $1 ORDER BY "createdAt" DESC',
+        [user.id]
+    )
 
     return (
         <div>

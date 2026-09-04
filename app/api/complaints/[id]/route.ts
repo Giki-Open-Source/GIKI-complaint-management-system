@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+import { pool, query } from '@/lib/db'
 import { getUserFromToken } from '@/lib/auth'
 import { cookies } from 'next/headers'
+import { randomUUID } from 'crypto'
 import { z } from 'zod'
 
 const updateSchema = z.object({
@@ -25,9 +26,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         const { status, resolutionSummary, internalNotes, escalationReason } = updateSchema.parse(body)
         const { id: complaintId } = await params
 
-        const complaint = await prisma.complaint.findUnique({
-            where: { id: complaintId },
-        })
+        const { rows: complaintRows } = await query('SELECT * FROM "Complaint" WHERE id = $1', [complaintId])
+        const complaint = complaintRows[0]
 
         if (!complaint) {
             return NextResponse.json({ error: 'Complaint not found' }, { status: 404 })
@@ -66,19 +66,38 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
             updates.internalNotes = internalNotes
         }
 
-        const updatedComplaint = await prisma.complaint.update({
-            where: { id: complaintId },
-            data: {
-                ...updates,
-                auditLogs: {
-                    create: {
-                        action: auditAction,
-                        actorId: user.id,
-                        details: auditDetails,
-                    }
-                }
-            }
-        })
+        const setClauses: string[] = []
+        const values: unknown[] = []
+        for (const [column, value] of Object.entries(updates)) {
+            values.push(value)
+            setClauses.push(`"${column}" = $${values.length}`)
+        }
+        values.push(complaintId)
+
+        const client = await pool.connect()
+        let updatedComplaint
+        try {
+            await client.query('BEGIN')
+
+            const { rows } = await client.query(
+                `UPDATE "Complaint" SET ${setClauses.join(', ')} WHERE id = $${values.length} RETURNING *`,
+                values
+            )
+            updatedComplaint = rows[0]
+
+            await client.query(
+                `INSERT INTO "AuditLog" (id, action, "actorId", details, "complaintId")
+                 VALUES ($1, $2, $3, $4, $5)`,
+                [randomUUID(), auditAction, user.id, auditDetails, complaintId]
+            )
+
+            await client.query('COMMIT')
+        } catch (error) {
+            await client.query('ROLLBACK')
+            throw error
+        } finally {
+            client.release()
+        }
 
         return NextResponse.json({ complaint: updatedComplaint })
     } catch (error) {

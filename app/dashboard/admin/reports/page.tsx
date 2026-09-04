@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers'
 import { getUserFromToken } from '@/lib/auth'
-import { prisma } from '@/lib/db'
+import { query } from '@/lib/db'
 
 export default async function ReportsPage() {
     const cookieStore = await cookies()
@@ -12,21 +12,18 @@ export default async function ReportsPage() {
     }
 
     // (a) Total complaint volume by category
-    const complaintsByCategory = await prisma.complaint.groupBy({
-        by: ['category'],
-        _count: { id: true },
-    })
+    const { rows: categoryRows } = await query(
+        'SELECT category, COUNT(id)::int AS count FROM "Complaint" GROUP BY category'
+    )
+    const complaintsByCategory = categoryRows.map((r: any) => ({ category: r.category, _count: { id: r.count } }))
 
     // (c) Complaints filtered by status
-    const complaintsByStatus = await prisma.complaint.groupBy({
-        by: ['status'],
-        _count: { id: true },
-    })
+    const { rows: statusRows } = await query(
+        'SELECT status, COUNT(id)::int AS count FROM "Complaint" GROUP BY status'
+    )
+    const complaintsByStatus = statusRows.map((r: any) => ({ status: r.status, _count: { id: r.count } }))
 
-    // (b) Average Resolution Time (ART) per department
-    // This is complex in Prisma without raw SQL or aggregation on date diffs.
-    // For MVP, we'll skip complex ART calculation or do it in JS if dataset is small.
-    // Let's just show the counts for now.
+    // (b) Average Resolution Time (ART) per department — not implemented yet.
 
     return (
         <div>

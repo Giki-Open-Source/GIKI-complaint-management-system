@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers'
 import { getUserFromToken } from '@/lib/auth'
-import { prisma } from '@/lib/db'
+import { query } from '@/lib/db'
 import ComplaintActions from './actions'
 import CommentsSection from './comments'
 import Link from 'next/link'
@@ -15,26 +15,43 @@ export default async function ComplaintDetailsPage({ params }: { params: Promise
         return <div>Unauthorized</div>
     }
 
-    const complaint = await prisma.complaint.findUnique({
-        where: { id },
-        include: {
-            complainant: true,
-            attachments: true,
-            assignedOfficer: true,
-            assignedDept: true,
-            comments: {
-                include: {
-                    author: {
-                        select: { name: true, role: true }
-                    }
-                },
-                orderBy: { createdAt: 'asc' }
-            }
-        }
-    })
+    const { rows: complaintRows } = await query(
+        `SELECT c.*,
+                cu.name AS "complainantName",
+                officer.name AS "assignedOfficerName",
+                d.name AS "assignedDeptName"
+         FROM "Complaint" c
+         JOIN "User" cu ON cu.id = c."complainantId"
+         LEFT JOIN "User" officer ON officer.id = c."assignedOfficerId"
+         LEFT JOIN "Department" d ON d.id = c."assignedDeptId"
+         WHERE c.id = $1`,
+        [id]
+    )
+    const complaintRow = complaintRows[0]
 
-    if (!complaint) {
+    if (!complaintRow) {
         return <div>Complaint not found</div>
+    }
+
+    const [{ rows: attachments }, { rows: comments }] = await Promise.all([
+        query('SELECT * FROM "Attachment" WHERE "complaintId" = $1', [id]),
+        query(
+            `SELECT cm.*, jsonb_build_object('name', u.name, 'role', u.role) AS author
+             FROM "Comment" cm
+             JOIN "User" u ON u.id = cm."authorId"
+             WHERE cm."complaintId" = $1
+             ORDER BY cm."createdAt" ASC`,
+            [id]
+        ),
+    ])
+
+    const complaint = {
+        ...complaintRow,
+        complainant: { name: complaintRow.complainantName },
+        assignedOfficer: complaintRow.assignedOfficerName ? { name: complaintRow.assignedOfficerName } : null,
+        assignedDept: complaintRow.assignedDeptName ? { name: complaintRow.assignedDeptName } : null,
+        attachments,
+        comments,
     }
 
     // Access control
@@ -86,7 +103,7 @@ export default async function ComplaintDetailsPage({ params }: { params: Promise
                     <div style={{ marginBottom: '2rem' }}>
                         <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.5rem' }}>Attachments</h3>
                         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                            {complaint.attachments.map(file => (
+                            {complaint.attachments.map((file: any) => (
                                 <a
                                     key={file.id}
                                     href={file.url}

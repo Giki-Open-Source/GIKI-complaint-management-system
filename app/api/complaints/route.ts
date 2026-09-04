@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+import { pool, query } from '@/lib/db'
 import { getUserFromToken } from '@/lib/auth'
 import { cookies } from 'next/headers'
+import { randomUUID } from 'crypto'
 import { z } from 'zod'
 
 const complaintSchema = z.object({
@@ -25,13 +26,22 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const complaints = await prisma.complaint.findMany({
-        where: { complainantId: user.id },
-        include: { attachments: true },
-        orderBy: { createdAt: 'desc' },
-    })
+    const { rows: complaints } = await query(
+        'SELECT * FROM "Complaint" WHERE "complainantId" = $1 ORDER BY "createdAt" DESC',
+        [user.id]
+    )
 
-    return NextResponse.json({ complaints })
+    const complaintIds = complaints.map((c: any) => c.id)
+    const { rows: attachments } = complaintIds.length
+        ? await query('SELECT * FROM "Attachment" WHERE "complaintId" = ANY($1)', [complaintIds])
+        : { rows: [] as any[] }
+
+    const complaintsWithAttachments = complaints.map((c: any) => ({
+        ...c,
+        attachments: attachments.filter((a: any) => a.complaintId === c.id),
+    }))
+
+    return NextResponse.json({ complaints: complaintsWithAttachments })
 }
 
 // POST: Create new complaint
@@ -51,34 +61,50 @@ export async function POST(request: Request) {
 
         // Auto-route based on category (Simple logic for now)
         // In a real app, this would query the Category-Department mapping
-        let assignedDeptId = null
-        const dept = await prisma.department.findFirst({
-            where: { name: { contains: category } } // Naive matching
-        })
-        if (dept) assignedDeptId = dept.id
+        const { rows: deptRows } = await query(
+            'SELECT id FROM "Department" WHERE name ILIKE $1 LIMIT 1', // Naive matching
+            [`%${category}%`]
+        )
+        const assignedDeptId = deptRows[0]?.id ?? null
 
-        const complaint = await prisma.complaint.create({
-            data: {
-                title,
-                description,
-                category,
-                complainantId: user.id,
-                assignedDeptId,
-                attachments: {
-                    create: attachments,
-                },
-                auditLogs: {
-                    create: {
-                        action: 'SUBMITTED',
-                        actorId: user.id,
-                        details: 'Complaint submitted',
-                    }
-                }
-            },
-            include: { attachments: true },
-        })
+        const client = await pool.connect()
+        let complaint
+        let insertedAttachments: any[] = []
+        try {
+            await client.query('BEGIN')
 
-        return NextResponse.json({ complaint })
+            const complaintId = randomUUID()
+            const { rows } = await client.query(
+                `INSERT INTO "Complaint" (id, title, description, category, "complainantId", "assignedDeptId")
+                 VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+                [complaintId, title, description, category, user.id, assignedDeptId]
+            )
+            complaint = rows[0]
+
+            for (const attachment of attachments ?? []) {
+                const { rows: attRows } = await client.query(
+                    `INSERT INTO "Attachment" (id, url, name, size, "complaintId")
+                     VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+                    [randomUUID(), attachment.url, attachment.name, attachment.size, complaintId]
+                )
+                insertedAttachments.push(attRows[0])
+            }
+
+            await client.query(
+                `INSERT INTO "AuditLog" (id, action, "actorId", details, "complaintId")
+                 VALUES ($1, 'SUBMITTED', $2, 'Complaint submitted', $3)`,
+                [randomUUID(), user.id, complaintId]
+            )
+
+            await client.query('COMMIT')
+        } catch (error) {
+            await client.query('ROLLBACK')
+            throw error
+        } finally {
+            client.release()
+        }
+
+        return NextResponse.json({ complaint: { ...complaint, attachments: insertedAttachments } })
     } catch (error) {
         console.error('Complaint submission error:', error)
         if (error instanceof z.ZodError) {

@@ -10,30 +10,35 @@ A full-stack complaint management system for GIKI students, faculty, and staff.
 - **Reporting**: Basic analytics on complaint volume.
 
 ## Tech Stack
-- **Frontend**: Next.js 15, React, Vanilla CSS
-- **Backend**: Next.js API Routes  
-- **Database**: SQLite, Prisma ORM 
+- **Frontend**: Next.js 16, React, Vanilla CSS
+- **Backend**: Next.js API Routes
+- **Database**: PostgreSQL (Docker), raw SQL via `pg` (node-postgres)
 - **Auth**: JWT, Bcrypt
 
 ## Setup
 
-1. **Install Dependencies**
+1. **Start Postgres** (Docker required)
+   ```bash
+   docker compose up -d
+   ```
+
+2. **Install Dependencies**
    ```bash
    npm install
    ```
 
-2. **Database Setup**
+3. **Database Setup**
    ```bash
-   npx prisma generate
-   npx prisma db push
+   npm run db:init   # applies sql/schema.sql
+   npm run db:seed   # seeds departments + admin user
    ```
 
-3. **Run Development Server**
+4. **Run Development Server**
    ```bash
    npm run dev
    ```
 
-4. **Build for Production**
+5. **Build for Production**
    ```bash
    npm run build
    npm start

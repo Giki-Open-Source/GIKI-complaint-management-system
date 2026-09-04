@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+import { query } from '@/lib/db'
 import { getUserFromToken } from '@/lib/auth'
 import { cookies } from 'next/headers'
 import { z } from 'zod'
@@ -24,16 +24,33 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         const body = await request.json()
         const data = updateUserSchema.parse(body)
 
-        const updatedUser = await prisma.user.update({
-            where: { id },
-            data: {
-                ...(data.role && { role: data.role }),
-                ...(data.departmentId !== undefined && { departmentId: data.departmentId }),
-            }
-        })
+        const updates: Record<string, unknown> = {}
+        if (data.role) updates.role = data.role
+        if (data.departmentId !== undefined) updates.departmentId = data.departmentId
 
-        const { password, ...userWithoutPassword } = updatedUser
-        return NextResponse.json({ user: userWithoutPassword })
+        if (Object.keys(updates).length === 0) {
+            const { rows } = await query(
+                'SELECT id, name, email, role, "departmentId", "emailVerified", "verificationToken", "createdAt", "updatedAt" FROM "User" WHERE id = $1',
+                [id]
+            )
+            return NextResponse.json({ user: rows[0] })
+        }
+
+        const setClauses: string[] = []
+        const values: unknown[] = []
+        for (const [column, value] of Object.entries(updates)) {
+            values.push(value)
+            setClauses.push(`"${column}" = $${values.length}`)
+        }
+        values.push(id)
+
+        const { rows } = await query(
+            `UPDATE "User" SET ${setClauses.join(', ')} WHERE id = $${values.length}
+             RETURNING id, name, email, role, "departmentId", "emailVerified", "verificationToken", "createdAt", "updatedAt"`,
+            values
+        )
+
+        return NextResponse.json({ user: rows[0] })
     } catch (error) {
         return NextResponse.json({ error: 'Failed to update user' }, { status: 500 })
     }
@@ -54,9 +71,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     }
 
     try {
-        await prisma.user.delete({
-            where: { id }
-        })
+        await query('DELETE FROM "User" WHERE id = $1', [id])
 
         return NextResponse.json({ success: true })
     } catch (error) {

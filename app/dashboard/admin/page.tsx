@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers'
 import { getUserFromToken } from '@/lib/auth'
-import { prisma } from '@/lib/db'
+import { query } from '@/lib/db'
 import Link from 'next/link'
 import ComplaintAssignment from './complaints/assignment-modal'
 
@@ -14,28 +14,40 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
     }
 
     const { status, category } = await searchParams
-    const whereClause: any = {}
-    if (status) whereClause.status = status
-    if (category) whereClause.category = category
+    const conditions: string[] = []
+    const values: unknown[] = []
+    if (status) { values.push(status); conditions.push(`c.status = $${values.length}`) }
+    if (category) { values.push(category); conditions.push(`c.category = $${values.length}`) }
+    const whereSql = conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''
 
-    const complaints = await prisma.complaint.findMany({
-        where: whereClause,
-        orderBy: { createdAt: 'desc' },
-        include: { complainant: true, assignedDept: true, assignedOfficer: true }
-    })
+    const { rows: complaintRows } = await query(
+        `SELECT c.*, cu.name AS "complainantName", d.name AS "assignedDeptName"
+         FROM "Complaint" c
+         JOIN "User" cu ON cu.id = c."complainantId"
+         LEFT JOIN "Department" d ON d.id = c."assignedDeptId"
+         ${whereSql}
+         ORDER BY c."createdAt" DESC`,
+        values
+    )
+    const complaints = complaintRows.map((c: any) => ({
+        ...c,
+        complainant: { name: c.complainantName },
+        assignedDept: c.assignedDeptName ? { name: c.assignedDeptName } : null,
+    }))
 
-    const departments = await prisma.department.findMany()
-    const officers = await prisma.user.findMany({
-        where: {
-            role: {
-                in: ['FACULTY', 'STAFF', 'DEPT_OFFICER']
-            }
-        }
-    })
+    const { rows: departments } = await query('SELECT * FROM "Department"')
+    const { rows: officers } = await query(
+        `SELECT id, name, email, role, "departmentId" FROM "User" WHERE role = ANY($1)`,
+        [['FACULTY', 'STAFF', 'DEPT_OFFICER']]
+    )
 
     // Stats for quick view
-    const totalComplaints = await prisma.complaint.count()
-    const resolvedComplaints = await prisma.complaint.count({ where: { status: 'RESOLVED' } })
+    const { rows: totalRows } = await query('SELECT COUNT(*)::int AS count FROM "Complaint"')
+    const { rows: resolvedRows } = await query(
+        `SELECT COUNT(*)::int AS count FROM "Complaint" WHERE status = 'RESOLVED'`
+    )
+    const totalComplaints = totalRows[0].count
+    const resolvedComplaints = resolvedRows[0].count
     const pendingComplaints = totalComplaints - resolvedComplaints
 
     return (
