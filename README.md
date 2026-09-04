@@ -1,4 +1,4 @@
-# GIKI Complaint Management System (GIKOmplain)
+# GIKI Complaint Management System (GIKomplain)
 
 A full-stack complaint management system for GIKI students, faculty, and staff.
 

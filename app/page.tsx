@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function Home() {
   return (
@@ -15,6 +16,13 @@ export default function Home() {
         width: '100%',
         textAlign: 'center',
       }}>
+        <Image
+          src="/giki-logo.png"
+          alt="GIKI logo"
+          width={72}
+          height={72}
+          style={{ borderRadius: '12px', marginBottom: '1.5rem' }}
+        />
         <h1 style={{
           fontSize: '3.5rem',
           fontWeight: '800',

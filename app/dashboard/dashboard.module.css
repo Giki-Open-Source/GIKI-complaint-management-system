@@ -27,7 +27,12 @@
     letter-spacing: -0.05em;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.625rem;
+}
+
+.logoImg {
+    border-radius: 6px;
+    flex-shrink: 0;
 }
 
 .nav {

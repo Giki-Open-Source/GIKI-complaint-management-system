@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function LoginPage() {
     const [email, setEmail] = useState('')
@@ -52,6 +53,14 @@ export default function LoginPage() {
         }}>
             <div className="card" style={{ width: '100%', maxWidth: '400px' }}>
                 <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
+                    <Image
+                        src="/giki-logo.png"
+                        alt="GIKI logo"
+                        width={48}
+                        height={48}
+                        style={{ borderRadius: '10px', marginBottom: '1rem' }}
+                    />
+                    <div style={{ fontSize: '0.875rem', fontWeight: '600', letterSpacing: '-0.02em', marginBottom: '1.25rem', color: 'var(--muted-foreground)' }}>GIKomplain</div>
                     <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>Welcome back</h1>
                     <p className="text-muted text-sm">Enter your credentials to access your account</p>
                 </div>
