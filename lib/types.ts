@@ -17,6 +17,11 @@ export type SafeUser = Omit<User, 'password'>
 export interface Department {
     id: string
     name: string
+    categoryLabel: string | null
+    defaultPriority: string
+    slaHours: number
+    escalationContactName: string | null
+    escalationContactTitle: string | null
 }
 
 export interface Complaint {
@@ -24,12 +29,18 @@ export interface Complaint {
     title: string
     description: string
     category: string
+    subcategory: string | null
     status: string
+    priority: string
     complainantId: string
     assignedDeptId: string | null
     assignedOfficerId: string | null
     resolutionSummary: string | null
     internalNotes: string | null
+    rating: number | null
+    closedAt: Date | null
+    rejectionReason: string | null
+    reopenCount: number
     createdAt: Date
     updatedAt: Date
 }

@@ -27,19 +27,28 @@ export default async function DepartmentDashboard({ searchParams }: { searchPara
         conditions.push(`c.status = $${values.length}`)
     }
     const whereSql = conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''
-    const orderDirection = resolvedParams.sort === 'oldest' ? 'ASC' : 'DESC'
+
+    const orderBySql = resolvedParams.sort === 'oldest'
+        ? `c."createdAt" ASC`
+        : resolvedParams.sort === 'newest'
+            ? `c."createdAt" DESC`
+            : `CASE c.priority WHEN 'CRITICAL' THEN 1 WHEN 'HIGH' THEN 2 WHEN 'MEDIUM' THEN 3 ELSE 4 END ASC, c."createdAt" ASC`
 
     const { rows: complaintRows } = await query(
-        `SELECT c.*, cu.name AS "complainantName"
+        `SELECT c.*, cu.name AS "complainantName", d."slaHours" AS "deptSlaHours"
          FROM "Complaint" c
          JOIN "User" cu ON cu.id = c."complainantId"
+         LEFT JOIN "Department" d ON d.id = c."assignedDeptId"
          ${whereSql}
-         ORDER BY c."createdAt" ${orderDirection}`,
+         ORDER BY ${orderBySql}`,
         values
     )
     const complaints = complaintRows.map((c: any) => ({
         ...c,
         complainant: { name: c.complainantName },
+        isOverdue: c.deptSlaHours != null
+            && !['RESOLVED', 'CLOSED', 'REJECTED'].includes(c.status)
+            && (Date.now() - new Date(c.createdAt).getTime()) > c.deptSlaHours * 60 * 60 * 1000,
     }))
 
     // Calculate stats
@@ -126,6 +135,16 @@ export default async function DepartmentDashboard({ searchParams }: { searchPara
                                     </div>
 
                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'center', gap: '0.5rem' }}>
+                                        <div style={{ display: 'flex', gap: '0.375rem' }}>
+                                            {complaint.isOverdue && (
+                                                <span style={{ padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.7rem', fontWeight: '700', backgroundColor: '#ef4444', color: 'white' }}>
+                                                    OVERDUE
+                                                </span>
+                                            )}
+                                            <span style={{ padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.7rem', fontWeight: '600', backgroundColor: getPriorityColor(complaint.priority), color: 'white' }}>
+                                                {complaint.priority}
+                                            </span>
+                                        </div>
                                         <span style={{
                                             padding: '0.25rem 0.75rem',
                                             borderRadius: '9999px',
@@ -179,6 +198,18 @@ function getStatusColor(status: string) {
         case 'IN_PROGRESS': return '#eab308';
         case 'ESCALATED': return '#ef4444';
         case 'RESOLVED': return '#22c55e';
+        case 'CLOSED': return '#8b5cf6';
+        case 'REJECTED': return '#64748b';
+        default: return '#64748b';
+    }
+}
+
+function getPriorityColor(priority: string) {
+    switch (priority) {
+        case 'CRITICAL': return '#dc2626';
+        case 'HIGH': return '#ea580c';
+        case 'MEDIUM': return '#ca8a04';
+        case 'LOW': return '#16a34a';
         default: return '#64748b';
     }
 }

@@ -38,7 +38,7 @@ export async function POST(request: Request) {
         const { rows } = await query(
             `INSERT INTO "User" (id, name, email, password, role, "departmentId")
              VALUES ($1, $2, $3, $4, $5, $6)
-             RETURNING id, name, email, role, "departmentId", "emailVerified", "verificationToken", "createdAt", "updatedAt"`,
+             RETURNING id, name, email, role, "departmentId", "emailVerified", "createdAt", "updatedAt"`,
             [randomUUID(), data.name, data.email, hashedPassword, data.role, data.departmentId || null]
         )
 

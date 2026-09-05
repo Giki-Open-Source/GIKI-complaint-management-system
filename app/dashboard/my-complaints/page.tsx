@@ -31,16 +31,28 @@ export default async function MyComplaintsPage() {
                             <div className="card" style={{ transition: 'transform 0.2s', cursor: 'pointer' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
                                     <h3 style={{ fontWeight: '600', fontSize: '1.125rem' }}>{complaint.title}</h3>
-                                    <span style={{
-                                        padding: '0.25rem 0.75rem',
-                                        borderRadius: '9999px',
-                                        fontSize: '0.75rem',
-                                        fontWeight: '600',
-                                        backgroundColor: getStatusColor(complaint.status),
-                                        color: 'white'
-                                    }}>
-                                        {complaint.status}
-                                    </span>
+                                    <div style={{ display: 'flex', gap: '0.375rem' }}>
+                                        <span style={{
+                                            padding: '0.25rem 0.75rem',
+                                            borderRadius: '9999px',
+                                            fontSize: '0.75rem',
+                                            fontWeight: '600',
+                                            backgroundColor: getPriorityColor(complaint.priority),
+                                            color: 'white'
+                                        }}>
+                                            {complaint.priority}
+                                        </span>
+                                        <span style={{
+                                            padding: '0.25rem 0.75rem',
+                                            borderRadius: '9999px',
+                                            fontSize: '0.75rem',
+                                            fontWeight: '600',
+                                            backgroundColor: getStatusColor(complaint.status),
+                                            color: 'white'
+                                        }}>
+                                            {complaint.status}
+                                        </span>
+                                    </div>
                                 </div>
                                 <div style={{ display: 'flex', gap: '1rem', fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>
                                     <span>{complaint.category}</span>
@@ -62,6 +74,18 @@ function getStatusColor(status: string) {
         case 'IN_PROGRESS': return '#eab308'; // yellow
         case 'ESCALATED': return '#ef4444'; // red
         case 'RESOLVED': return '#22c55e'; // green
+        case 'CLOSED': return '#8b5cf6'; // purple
+        case 'REJECTED': return '#64748b'; // slate
         default: return '#64748b'; // slate
+    }
+}
+
+function getPriorityColor(priority: string) {
+    switch (priority) {
+        case 'CRITICAL': return '#dc2626';
+        case 'HIGH': return '#ea580c';
+        case 'MEDIUM': return '#ca8a04';
+        case 'LOW': return '#16a34a';
+        default: return '#64748b';
     }
 }

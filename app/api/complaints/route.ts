@@ -8,7 +8,8 @@ import { z } from 'zod'
 const complaintSchema = z.object({
     title: z.string().min(5),
     description: z.string().min(10),
-    category: z.string(),
+    departmentId: z.string(),
+    subcategory: z.string().optional(),
     attachments: z.array(z.object({
         url: z.string(),
         name: z.string(),
@@ -56,16 +57,20 @@ export async function POST(request: Request) {
 
     try {
         const body = await request.json()
-        console.log('Received complaint body:', body)
-        const { title, description, category, attachments } = complaintSchema.parse(body)
+        const { title, description, departmentId, subcategory, attachments } = complaintSchema.parse(body)
 
-        // Auto-route based on category (Simple logic for now)
-        // In a real app, this would query the Category-Department mapping
+        // Routing is now a direct FK assignment: the department the student
+        // picked IS the category. category/priority are denormalized from it
+        // at submission time so they stay accurate even if the department is
+        // later renamed or its default priority changes.
         const { rows: deptRows } = await query(
-            'SELECT id FROM "Department" WHERE name ILIKE $1 LIMIT 1', // Naive matching
-            [`%${category}%`]
+            'SELECT id, "categoryLabel", name, "defaultPriority" FROM "Department" WHERE id = $1',
+            [departmentId]
         )
-        const assignedDeptId = deptRows[0]?.id ?? null
+        const department = deptRows[0]
+        if (!department) {
+            return NextResponse.json({ error: 'Invalid category' }, { status: 400 })
+        }
 
         const client = await pool.connect()
         let complaint
@@ -75,9 +80,9 @@ export async function POST(request: Request) {
 
             const complaintId = randomUUID()
             const { rows } = await client.query(
-                `INSERT INTO "Complaint" (id, title, description, category, "complainantId", "assignedDeptId")
-                 VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-                [complaintId, title, description, category, user.id, assignedDeptId]
+                `INSERT INTO "Complaint" (id, title, description, category, subcategory, priority, "complainantId", "assignedDeptId")
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+                [complaintId, title, description, department.categoryLabel || department.name, subcategory ?? null, department.defaultPriority, user.id, department.id]
             )
             complaint = rows[0]
 

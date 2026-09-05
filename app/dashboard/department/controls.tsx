@@ -7,7 +7,7 @@ export default function DashboardControls() {
     const searchParams = useSearchParams()
 
     const currentStatus = searchParams.get('status') || 'ALL'
-    const currentSort = searchParams.get('sort') || 'newest'
+    const currentSort = searchParams.get('sort') || 'priority'
 
     function handleFilter(status: string) {
         const params = new URLSearchParams(searchParams.toString())
@@ -27,7 +27,7 @@ export default function DashboardControls() {
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                 <span style={{ fontWeight: '500', color: 'var(--muted-foreground)' }}>Filter by:</span>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    {['ALL', 'SUBMITTED', 'IN_PROGRESS', 'RESOLVED'].map((status) => (
+                    {['ALL', 'SUBMITTED', 'IN_PROGRESS', 'ESCALATED', 'RESOLVED', 'REJECTED', 'CLOSED'].map((status) => (
                         <button
                             key={status}
                             onClick={() => handleFilter(status)}
@@ -48,6 +48,7 @@ export default function DashboardControls() {
                     className="input"
                     style={{ width: 'auto', padding: '0.25rem 2rem 0.25rem 0.75rem' }}
                 >
+                    <option value="priority">Priority (Recommended)</option>
                     <option value="newest">Newest First</option>
                     <option value="oldest">Oldest First</option>
                 </select>

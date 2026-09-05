@@ -1,13 +1,26 @@
 'use client'
 
-import { useState, FormEvent } from 'react'
+import { useState, useEffect, FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
+
+interface DepartmentOption {
+    id: string
+    categoryLabel: string | null
+    name: string
+}
 
 export default function SubmitComplaintPage() {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
     const [files, setFiles] = useState<File[]>([])
+    const [departments, setDepartments] = useState<DepartmentOption[]>([])
+
+    useEffect(() => {
+        fetch('/api/departments')
+            .then(res => res.json())
+            .then(data => setDepartments(data.departments || []))
+    }, [])
 
     async function handleSubmit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault()
@@ -17,7 +30,8 @@ export default function SubmitComplaintPage() {
         const formData = new FormData(e.currentTarget)
         const title = formData.get('title') as string
         const description = formData.get('description') as string
-        const category = formData.get('category') as string
+        const departmentId = formData.get('departmentId') as string
+        const subcategory = formData.get('subcategory') as string
 
         try {
             // Upload files first
@@ -45,7 +59,8 @@ export default function SubmitComplaintPage() {
                 body: JSON.stringify({
                     title,
                     description,
-                    category,
+                    departmentId,
+                    subcategory: subcategory || undefined,
                     attachments: uploadedAttachments
                 }),
             })
@@ -102,14 +117,17 @@ export default function SubmitComplaintPage() {
 
                 <div>
                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Category</label>
-                    <select name="category" required className="input">
+                    <select name="departmentId" required className="input">
                         <option value="">Select a category</option>
-                        <option value="Academic">Academic</option>
-                        <option value="Maintenance">Maintenance</option>
-                        <option value="Hostel">Hostel</option>
-                        <option value="IT Services">IT Services</option>
-                        <option value="Other">Other</option>
+                        {departments.map(dept => (
+                            <option key={dept.id} value={dept.id}>{dept.categoryLabel || dept.name}</option>
+                        ))}
                     </select>
+                </div>
+
+                <div>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Additional Detail (optional)</label>
+                    <input name="subcategory" className="input" placeholder="e.g. Electrical - fan not working" />
                 </div>
 
                 <div>

@@ -10,5 +10,14 @@ export enum Status {
     SUBMITTED = 'SUBMITTED',
     IN_PROGRESS = 'IN_PROGRESS',
     ESCALATED = 'ESCALATED',
-    RESOLVED = 'RESOLVED'
+    RESOLVED = 'RESOLVED',
+    REJECTED = 'REJECTED',
+    CLOSED = 'CLOSED'
+}
+
+export enum Priority {
+    LOW = 'LOW',
+    MEDIUM = 'MEDIUM',
+    HIGH = 'HIGH',
+    CRITICAL = 'CRITICAL'
 }

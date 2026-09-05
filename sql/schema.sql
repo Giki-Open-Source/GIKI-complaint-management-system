@@ -7,6 +7,14 @@ CREATE TABLE IF NOT EXISTS "Department" (
     name TEXT NOT NULL UNIQUE
 );
 
+-- Hierarchy: each department owns exactly one student-facing category 1:1,
+-- plus the metadata needed for routing, default priority, and SLA display.
+ALTER TABLE "Department" ADD COLUMN IF NOT EXISTS "categoryLabel" TEXT;
+ALTER TABLE "Department" ADD COLUMN IF NOT EXISTS "defaultPriority" TEXT NOT NULL DEFAULT 'MEDIUM';
+ALTER TABLE "Department" ADD COLUMN IF NOT EXISTS "slaHours" INTEGER NOT NULL DEFAULT 48;
+ALTER TABLE "Department" ADD COLUMN IF NOT EXISTS "escalationContactName" TEXT;
+ALTER TABLE "Department" ADD COLUMN IF NOT EXISTS "escalationContactTitle" TEXT;
+
 CREATE TABLE IF NOT EXISTS "User" (
     id                 TEXT PRIMARY KEY,
     email              TEXT NOT NULL UNIQUE,
@@ -40,6 +48,13 @@ CREATE TABLE IF NOT EXISTS "Complaint" (
     "createdAt"         TIMESTAMPTZ NOT NULL DEFAULT now(),
     "updatedAt"         TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+ALTER TABLE "Complaint" ADD COLUMN IF NOT EXISTS "subcategory" TEXT;
+ALTER TABLE "Complaint" ADD COLUMN IF NOT EXISTS "priority" TEXT NOT NULL DEFAULT 'MEDIUM';
+ALTER TABLE "Complaint" ADD COLUMN IF NOT EXISTS "rating" INTEGER;
+ALTER TABLE "Complaint" ADD COLUMN IF NOT EXISTS "closedAt" TIMESTAMPTZ;
+ALTER TABLE "Complaint" ADD COLUMN IF NOT EXISTS "rejectionReason" TEXT;
+ALTER TABLE "Complaint" ADD COLUMN IF NOT EXISTS "reopenCount" INTEGER NOT NULL DEFAULT 0;
 
 CREATE TABLE IF NOT EXISTS "Attachment" (
     id            TEXT PRIMARY KEY,
