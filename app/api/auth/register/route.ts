@@ -14,7 +14,7 @@ const registerSchema = z.object({
     ),
     password: z.string().min(6),
     name: z.string().min(2),
-    role: z.nativeEnum(Role).optional(),
+    role: z.enum([Role.STUDENT, Role.FACULTY, Role.STAFF, Role.DEPT_OFFICER]).optional(),
     departmentId: z.string().optional(),
 })
 
