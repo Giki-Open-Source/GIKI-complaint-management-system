@@ -19,7 +19,10 @@ export default async function ComplaintDetailsPage({ params }: { params: Promise
         `SELECT c.*,
                 cu.name AS "complainantName",
                 officer.name AS "assignedOfficerName",
-                d.name AS "assignedDeptName"
+                d.name AS "assignedDeptName",
+                d."slaHours" AS "deptSlaHours",
+                d."escalationContactName" AS "deptEscalationContactName",
+                d."escalationContactTitle" AS "deptEscalationContactTitle"
          FROM "Complaint" c
          JOIN "User" cu ON cu.id = c."complainantId"
          LEFT JOIN "User" officer ON officer.id = c."assignedOfficerId"
@@ -33,7 +36,7 @@ export default async function ComplaintDetailsPage({ params }: { params: Promise
         return <div>Complaint not found</div>
     }
 
-    const [{ rows: attachments }, { rows: comments }] = await Promise.all([
+    const [{ rows: attachments }, { rows: comments }, { rows: departments }] = await Promise.all([
         query('SELECT * FROM "Attachment" WHERE "complaintId" = $1', [id]),
         query(
             `SELECT cm.*, jsonb_build_object('name', u.name, 'role', u.role) AS author
@@ -43,6 +46,7 @@ export default async function ComplaintDetailsPage({ params }: { params: Promise
              ORDER BY cm."createdAt" ASC`,
             [id]
         ),
+        query('SELECT id, name, "categoryLabel" FROM "Department" ORDER BY "categoryLabel" ASC'),
     ])
 
     const complaint = {
@@ -53,6 +57,10 @@ export default async function ComplaintDetailsPage({ params }: { params: Promise
         attachments,
         comments,
     }
+
+    const isOverdue = complaintRow.deptSlaHours != null
+        && !['RESOLVED', 'CLOSED', 'REJECTED'].includes(complaint.status)
+        && (Date.now() - new Date(complaint.createdAt).getTime()) > complaintRow.deptSlaHours * 60 * 60 * 1000
 
     // Access control
     const isComplainant = complaint.complainantId === user.id
@@ -79,19 +87,29 @@ export default async function ComplaintDetailsPage({ params }: { params: Promise
                         <div style={{ display: 'flex', gap: '1rem', fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>
                             <span>{new Date(complaint.createdAt).toLocaleString()}</span>
                             <span>•</span>
-                            <span>{complaint.category}</span>
+                            <span>{complaint.category}{complaint.subcategory ? ` — ${complaint.subcategory}` : ''}</span>
                         </div>
                     </div>
-                    <span style={{
-                        padding: '0.25rem 0.75rem',
-                        borderRadius: '9999px',
-                        fontSize: '0.875rem',
-                        fontWeight: '600',
-                        backgroundColor: getStatusColor(complaint.status),
-                        color: 'white'
-                    }}>
-                        {complaint.status.replace('_', ' ')}
-                    </span>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                        {isOverdue && (
+                            <span style={{ padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: '700', backgroundColor: '#ef4444', color: 'white' }}>
+                                OVERDUE
+                            </span>
+                        )}
+                        <span style={{ padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: '600', backgroundColor: getPriorityColor(complaint.priority), color: 'white' }}>
+                            {complaint.priority}
+                        </span>
+                        <span style={{
+                            padding: '0.25rem 0.75rem',
+                            borderRadius: '9999px',
+                            fontSize: '0.875rem',
+                            fontWeight: '600',
+                            backgroundColor: getStatusColor(complaint.status),
+                            color: 'white'
+                        }}>
+                            {complaint.status.replace('_', ' ')}
+                        </span>
+                    </div>
                 </div>
 
                 <div style={{ marginBottom: '2rem' }}>
@@ -149,12 +167,32 @@ export default async function ComplaintDetailsPage({ params }: { params: Promise
                             <div style={{ fontWeight: '500' }}>{complaint.assignedOfficer.name}</div>
                         </div>
                     )}
+                    {complaintRow.deptEscalationContactName && (
+                        <div>
+                            <div style={{ color: 'var(--muted-foreground)', marginBottom: '0.25rem' }}>Escalation Contact</div>
+                            <div style={{ fontWeight: '500' }}>{complaintRow.deptEscalationContactTitle || complaintRow.deptEscalationContactName}</div>
+                        </div>
+                    )}
                 </div>
 
                 {complaint.resolutionSummary && (
                     <div style={{ marginTop: '2rem', padding: '1.5rem', backgroundColor: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.2)', borderRadius: 'var(--radius)' }}>
                         <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.5rem', color: '#16a34a' }}>Resolution</h3>
                         <p>{complaint.resolutionSummary}</p>
+                    </div>
+                )}
+
+                {complaint.rejectionReason && (
+                    <div style={{ marginTop: '2rem', padding: '1.5rem', backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: 'var(--radius)' }}>
+                        <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.5rem', color: '#ef4444' }}>Rejected</h3>
+                        <p>{complaint.rejectionReason}</p>
+                    </div>
+                )}
+
+                {complaint.status === 'CLOSED' && complaint.rating && (
+                    <div style={{ marginTop: '2rem', padding: '1.5rem', backgroundColor: 'var(--secondary)', borderRadius: 'var(--radius)' }}>
+                        <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.5rem' }}>Student Rating</h3>
+                        <p>{'★'.repeat(complaint.rating)}{'☆'.repeat(5 - complaint.rating)}</p>
                     </div>
                 )}
             </div>
@@ -164,6 +202,9 @@ export default async function ComplaintDetailsPage({ params }: { params: Promise
                 currentStatus={complaint.status}
                 isAssignedOfficer={isAssignedOfficer}
                 isAdmin={isAdmin}
+                isDeptOfficer={isDeptOfficer}
+                isComplainant={isComplainant}
+                departments={departments as any}
             />
 
             <CommentsSection
@@ -181,6 +222,18 @@ function getStatusColor(status: string) {
         case 'IN_PROGRESS': return '#eab308';
         case 'ESCALATED': return '#ef4444';
         case 'RESOLVED': return '#22c55e';
+        case 'CLOSED': return '#8b5cf6';
+        case 'REJECTED': return '#64748b';
+        default: return '#64748b';
+    }
+}
+
+function getPriorityColor(priority: string) {
+    switch (priority) {
+        case 'CRITICAL': return '#dc2626';
+        case 'HIGH': return '#ea580c';
+        case 'MEDIUM': return '#ca8a04';
+        case 'LOW': return '#16a34a';
         default: return '#64748b';
     }
 }

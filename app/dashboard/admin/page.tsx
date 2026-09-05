@@ -21,7 +21,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
     const whereSql = conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''
 
     const { rows: complaintRows } = await query(
-        `SELECT c.*, cu.name AS "complainantName", d.name AS "assignedDeptName"
+        `SELECT c.*, cu.name AS "complainantName", d.name AS "assignedDeptName", d."slaHours" AS "deptSlaHours"
          FROM "Complaint" c
          JOIN "User" cu ON cu.id = c."complainantId"
          LEFT JOIN "Department" d ON d.id = c."assignedDeptId"
@@ -33,6 +33,9 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
         ...c,
         complainant: { name: c.complainantName },
         assignedDept: c.assignedDeptName ? { name: c.assignedDeptName } : null,
+        isOverdue: c.deptSlaHours != null
+            && !['RESOLVED', 'CLOSED', 'REJECTED'].includes(c.status)
+            && (Date.now() - new Date(c.createdAt).getTime()) > c.deptSlaHours * 60 * 60 * 1000,
     }))
 
     const { rows: departments } = await query('SELECT * FROM "Department"')
@@ -83,6 +86,8 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
                     <Link href="/dashboard/admin?status=IN_PROGRESS" className="btn btn-outline" style={{ opacity: status === 'IN_PROGRESS' ? 1 : 0.5 }}>In Progress</Link>
                     <Link href="/dashboard/admin?status=ESCALATED" className="btn btn-outline" style={{ opacity: status === 'ESCALATED' ? 1 : 0.5 }}>Escalated</Link>
                     <Link href="/dashboard/admin?status=RESOLVED" className="btn btn-outline" style={{ opacity: status === 'RESOLVED' ? 1 : 0.5 }}>Resolved</Link>
+                    <Link href="/dashboard/admin?status=CLOSED" className="btn btn-outline" style={{ opacity: status === 'CLOSED' ? 1 : 0.5 }}>Closed</Link>
+                    <Link href="/dashboard/admin?status=REJECTED" className="btn btn-outline" style={{ opacity: status === 'REJECTED' ? 1 : 0.5 }}>Rejected</Link>
                 </div>
             </div>
 
@@ -106,6 +111,14 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                        {complaint.isOverdue && (
+                                            <span style={{ padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: '700', backgroundColor: '#ef4444', color: 'white' }}>
+                                                OVERDUE
+                                            </span>
+                                        )}
+                                        <span style={{ padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: '600', backgroundColor: getPriorityColor(complaint.priority), color: 'white' }}>
+                                            {complaint.priority}
+                                        </span>
                                         <span style={{
                                             padding: '0.25rem 0.75rem',
                                             borderRadius: '9999px',
@@ -140,6 +153,18 @@ function getStatusColor(status: string) {
         case 'IN_PROGRESS': return '#eab308';
         case 'ESCALATED': return '#ef4444';
         case 'RESOLVED': return '#22c55e';
+        case 'CLOSED': return '#8b5cf6';
+        case 'REJECTED': return '#64748b';
+        default: return '#64748b';
+    }
+}
+
+function getPriorityColor(priority: string) {
+    switch (priority) {
+        case 'CRITICAL': return '#dc2626';
+        case 'HIGH': return '#ea580c';
+        case 'MEDIUM': return '#ca8a04';
+        case 'LOW': return '#16a34a';
         default: return '#64748b';
     }
 }

@@ -6,10 +6,17 @@ import { randomUUID } from 'crypto'
 import { z } from 'zod'
 
 const updateSchema = z.object({
-    status: z.enum(['IN_PROGRESS', 'ESCALATED', 'RESOLVED']),
+    status: z.enum(['IN_PROGRESS', 'ESCALATED', 'RESOLVED', 'REJECTED']).optional(),
     resolutionSummary: z.string().optional(),
     internalNotes: z.string().optional(),
     escalationReason: z.string().optional(),
+    rejectionReason: z.string().optional(),
+    assignedDeptId: z.string().optional(), // reroute: change department while still SUBMITTED
+    resolutionProof: z.object({
+        url: z.string(),
+        name: z.string(),
+        size: z.number(),
+    }).optional(),
 })
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -23,7 +30,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
     try {
         const body = await request.json()
-        const { status, resolutionSummary, internalNotes, escalationReason } = updateSchema.parse(body)
+        const { status, resolutionSummary, internalNotes, escalationReason, rejectionReason, assignedDeptId, resolutionProof } = updateSchema.parse(body)
         const { id: complaintId } = await params
 
         const { rows: complaintRows } = await query('SELECT * FROM "Complaint" WHERE id = $1', [complaintId])
@@ -39,6 +46,42 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
         if (!isOfficer && !isAdmin) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+        }
+
+        // Reroute: assignedDeptId provided with no status change, only while still SUBMITTED
+        // (a miscategorized ticket goes back to routing, not to a specific officer).
+        if (assignedDeptId && !status) {
+            if (complaint.status !== 'SUBMITTED') {
+                return NextResponse.json({ error: 'Can only reroute a complaint that has not been claimed yet' }, { status: 400 })
+            }
+
+            const client = await pool.connect()
+            let rerouted
+            try {
+                await client.query('BEGIN')
+                const { rows } = await client.query(
+                    `UPDATE "Complaint" SET "assignedDeptId" = $1 WHERE id = $2 RETURNING *`,
+                    [assignedDeptId, complaintId]
+                )
+                rerouted = rows[0]
+                await client.query(
+                    `INSERT INTO "AuditLog" (id, action, "actorId", details, "complaintId")
+                     VALUES ($1, 'REROUTED', $2, $3, $4)`,
+                    [randomUUID(), user.id, `Rerouted from department ${complaint.assignedDeptId} to ${assignedDeptId}`, complaintId]
+                )
+                await client.query('COMMIT')
+            } catch (error) {
+                await client.query('ROLLBACK')
+                throw error
+            } finally {
+                client.release()
+            }
+
+            return NextResponse.json({ complaint: rerouted })
+        }
+
+        if (!status) {
+            return NextResponse.json({ error: 'status is required' }, { status: 400 })
         }
 
         // Logic for transitions
@@ -60,6 +103,15 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
                 return NextResponse.json({ error: 'Escalation reason is required' }, { status: 400 })
             }
             auditDetails = `Escalated: ${escalationReason}`
+        } else if (status === 'REJECTED') {
+            if (complaint.status !== 'SUBMITTED') {
+                return NextResponse.json({ error: 'Can only reject a complaint that has not been claimed yet' }, { status: 400 })
+            }
+            if (!rejectionReason) {
+                return NextResponse.json({ error: 'Rejection reason is required' }, { status: 400 })
+            }
+            updates.rejectionReason = rejectionReason
+            auditDetails = `Rejected: ${rejectionReason}`
         }
 
         if (internalNotes) {
@@ -84,6 +136,14 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
                 values
             )
             updatedComplaint = rows[0]
+
+            if (status === 'RESOLVED' && resolutionProof) {
+                await client.query(
+                    `INSERT INTO "Attachment" (id, url, name, size, "complaintId")
+                     VALUES ($1, $2, $3, $4, $5)`,
+                    [randomUUID(), resolutionProof.url, resolutionProof.name, resolutionProof.size, complaintId]
+                )
+            }
 
             await client.query(
                 `INSERT INTO "AuditLog" (id, action, "actorId", details, "complaintId")

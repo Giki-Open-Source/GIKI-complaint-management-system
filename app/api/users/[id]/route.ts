@@ -30,7 +30,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
         if (Object.keys(updates).length === 0) {
             const { rows } = await query(
-                'SELECT id, name, email, role, "departmentId", "emailVerified", "verificationToken", "createdAt", "updatedAt" FROM "User" WHERE id = $1',
+                'SELECT id, name, email, role, "departmentId", "emailVerified", "createdAt", "updatedAt" FROM "User" WHERE id = $1',
                 [id]
             )
             return NextResponse.json({ user: rows[0] })
@@ -46,7 +46,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
         const { rows } = await query(
             `UPDATE "User" SET ${setClauses.join(', ')} WHERE id = $${values.length}
-             RETURNING id, name, email, role, "departmentId", "emailVerified", "verificationToken", "createdAt", "updatedAt"`,
+             RETURNING id, name, email, role, "departmentId", "emailVerified", "createdAt", "updatedAt"`,
             values
         )
 
