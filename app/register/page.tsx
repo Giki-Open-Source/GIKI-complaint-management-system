@@ -211,7 +211,6 @@ export default function RegisterPage() {
                                 <option value="FACULTY">Faculty</option>
                                 <option value="STAFF">Staff</option>
                                 <option value="DEPT_OFFICER">Department Officer</option>
-                                <option value="ADMIN">Admin</option>
                             </select>
                         </div>
 
