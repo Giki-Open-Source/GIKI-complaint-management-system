@@ -13,6 +13,7 @@ interface Profile {
     hostelName: string | null
     roomNumber: string | null
     major: string | null
+    gender: string | null
 }
 
 export default function ProfileForm({ profile }: { profile: Profile }) {
@@ -24,6 +25,7 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
     const [hostelName, setHostelName] = useState(profile.hostelName || '')
     const [roomNumber, setRoomNumber] = useState(profile.roomNumber || '')
     const [major, setMajor] = useState(profile.major || '')
+    const [gender, setGender] = useState(profile.gender || '')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
     const [success, setSuccess] = useState('')
@@ -38,7 +40,7 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
             const res = await fetch('/api/users/me', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ registrationNumber, hostelName, roomNumber, major }),
+                body: JSON.stringify({ registrationNumber, hostelName, roomNumber, major, gender: gender || undefined }),
             })
             if (!res.ok) throw new Error('Failed to save profile')
             setSuccess('Profile saved.')
@@ -70,6 +72,15 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
             <div>
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', fontSize: '0.875rem' }}>Email</label>
                 <input className="input" value={profile.email} disabled />
+            </div>
+
+            <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', fontSize: '0.875rem' }}>Gender</label>
+                <select className="input" value={gender} onChange={(e) => setGender(e.target.value)}>
+                    <option value="">Prefer not to say</option>
+                    <option value="MALE">Male</option>
+                    <option value="FEMALE">Female</option>
+                </select>
             </div>
 
             <div>

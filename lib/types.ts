@@ -14,6 +14,7 @@ export interface User {
     hostelName: string | null
     roomNumber: string | null
     major: string | null
+    gender: string | null
 }
 
 export type SafeUser = Omit<User, 'password'>
