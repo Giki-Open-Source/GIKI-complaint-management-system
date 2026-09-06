@@ -14,6 +14,11 @@ ALTER TABLE "Department" ADD COLUMN IF NOT EXISTS "defaultPriority" TEXT NOT NUL
 ALTER TABLE "Department" ADD COLUMN IF NOT EXISTS "slaHours" INTEGER NOT NULL DEFAULT 48;
 ALTER TABLE "Department" ADD COLUMN IF NOT EXISTS "escalationContactName" TEXT;
 ALTER TABLE "Department" ADD COLUMN IF NOT EXISTS "escalationContactTitle" TEXT;
+-- Hostels get their own department each (own Supervisor, own queue) rather
+-- than sharing one generic "Hostel Maintenance" bucket. Flagged so the
+-- student-facing submit form can auto-route to the student's own hostel
+-- instead of listing all of them as manually pickable categories.
+ALTER TABLE "Department" ADD COLUMN IF NOT EXISTS "isHostel" BOOLEAN NOT NULL DEFAULT false;
 
 CREATE TABLE IF NOT EXISTS "User" (
     id                 TEXT PRIMARY KEY,

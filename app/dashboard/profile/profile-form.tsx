@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { getProfileFieldLabels, getRequiredProfileFields } from '@/lib/profile'
 
@@ -26,9 +26,16 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
     const [roomNumber, setRoomNumber] = useState(profile.roomNumber || '')
     const [major, setMajor] = useState(profile.major || '')
     const [gender, setGender] = useState(profile.gender || '')
+    const [hostels, setHostels] = useState<{ id: string, categoryLabel: string | null, name: string }[]>([])
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
     const [success, setSuccess] = useState('')
+
+    useEffect(() => {
+        fetch('/api/departments')
+            .then(res => res.json())
+            .then(data => setHostels((data.departments || []).filter((d: any) => d.isHostel)))
+    }, [])
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault()
@@ -99,12 +106,17 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', fontSize: '0.875rem' }}>
                     {labels.hostelName}{required.includes('hostelName') && ' (Required)'}
                 </label>
-                <input
+                <select
                     className="input"
                     value={hostelName}
                     onChange={(e) => setHostelName(e.target.value)}
                     required={required.includes('hostelName')}
-                />
+                >
+                    <option value="">{required.includes('hostelName') ? 'Select your hostel' : 'Not applicable'}</option>
+                    {hostels.map(h => (
+                        <option key={h.id} value={h.categoryLabel || h.name}>{h.categoryLabel || h.name}</option>
+                    ))}
+                </select>
             </div>
 
             <div>

@@ -7,9 +7,10 @@ interface DepartmentOption {
     id: string
     categoryLabel: string | null
     name: string
+    isHostel: boolean
 }
 
-export default function SubmitForm() {
+export default function SubmitForm({ hostelName }: { hostelName: string | null }) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
@@ -21,6 +22,13 @@ export default function SubmitForm() {
             .then(res => res.json())
             .then(data => setDepartments(data.departments || []))
     }, [])
+
+    // Hostels aren't manually pickable - a student's hostel complaint is
+    // auto-routed to their own hostel's supervisor, resolved from their
+    // profile, so nobody can (accidentally or otherwise) file into a
+    // different hostel's queue.
+    const nonHostelDepartments = departments.filter(d => !d.isHostel)
+    const ownHostelDept = departments.find(d => d.isHostel && (d.categoryLabel || d.name) === hostelName)
 
     async function handleSubmit(e: FormEvent<HTMLFormElement>) {
         e.preventDefault()
@@ -116,7 +124,10 @@ export default function SubmitForm() {
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>Category</label>
                 <select name="departmentId" required className="input">
                     <option value="">Select a category</option>
-                    {departments.map(dept => (
+                    {ownHostelDept && (
+                        <option value={ownHostelDept.id}>Hostel Maintenance ({ownHostelDept.categoryLabel || ownHostelDept.name})</option>
+                    )}
+                    {nonHostelDepartments.map(dept => (
                         <option key={dept.id} value={dept.id}>{dept.categoryLabel || dept.name}</option>
                     ))}
                 </select>
