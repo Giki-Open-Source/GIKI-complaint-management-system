@@ -34,6 +34,14 @@ ALTER TABLE "User" DROP COLUMN IF EXISTS "verificationToken";
 ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "otpCode" TEXT;
 ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "otpExpiresAt" TIMESTAMPTZ;
 
+-- Profile details needed so officers know *where* to physically act on a
+-- complaint (hostel/room for students, building/office + major/dept for
+-- faculty & staff). Required before a complainant can submit a complaint.
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "registrationNumber" TEXT;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "hostelName" TEXT;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "roomNumber" TEXT;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "major" TEXT;
+
 CREATE TABLE IF NOT EXISTS "Complaint" (
     id                  TEXT PRIMARY KEY,
     title               TEXT NOT NULL,

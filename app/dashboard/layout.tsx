@@ -3,6 +3,9 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { cookies } from 'next/headers'
 import { getUserFromToken } from '@/lib/auth'
+import { query } from '@/lib/db'
+import { isProfileComplete } from '@/lib/profile'
+import { UserCircle } from 'lucide-react'
 import styles from './dashboard.module.css'
 import DashboardLayoutClient from './layout-client'
 import SignOutButton from './sign-out-button'
@@ -16,6 +19,12 @@ export default async function DashboardLayout({ children }: { children: ReactNod
         return <div>Unauthorized</div>
     }
 
+    const { rows: profileRows } = await query(
+        `SELECT "registrationNumber", "hostelName", "roomNumber", "major" FROM "User" WHERE id = $1`,
+        [user.id]
+    )
+    const profileIncomplete = !isProfileComplete({ ...profileRows[0], role: user.role })
+
     const sidebarContent = (
         <>
             <div className={styles.logo}>
@@ -24,6 +33,13 @@ export default async function DashboardLayout({ children }: { children: ReactNod
             </div>
             <nav className={styles.nav}>
                 <Link href="/dashboard" className={styles.navItem}>Overview</Link>
+                <Link href="/dashboard/profile" className={styles.navItem} style={{ position: 'relative' }}>
+                    <UserCircle size={18} />
+                    My Profile
+                    {profileIncomplete && (
+                        <span style={{ width: '8px', height: '8px', borderRadius: '9999px', backgroundColor: '#ef4444', marginLeft: '0.25rem' }} title="Profile incomplete" />
+                    )}
+                </Link>
 
                 {user.role === 'STUDENT' || user.role === 'FACULTY' || user.role === 'STAFF' ? (
                     <>

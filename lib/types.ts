@@ -10,6 +10,10 @@ export interface User {
     emailVerified: Date | null
     otpCode: string | null
     otpExpiresAt: Date | null
+    registrationNumber: string | null
+    hostelName: string | null
+    roomNumber: string | null
+    major: string | null
 }
 
 export type SafeUser = Omit<User, 'password'>
