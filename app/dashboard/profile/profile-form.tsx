@@ -20,6 +20,7 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
     const router = useRouter()
     const labels = getProfileFieldLabels(profile.role)
     const required = getRequiredProfileFields(profile.role)
+    const showComplaintFields = ['STUDENT', 'FACULTY', 'STAFF'].includes(profile.role)
 
     const [registrationNumber, setRegistrationNumber] = useState(profile.registrationNumber || '')
     const [hostelName, setHostelName] = useState(profile.hostelName || '')
@@ -32,10 +33,11 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
     const [success, setSuccess] = useState('')
 
     useEffect(() => {
+        if (!showComplaintFields) return
         fetch('/api/departments')
             .then(res => res.json())
             .then(data => setHostels((data.departments || []).filter((d: any) => d.isHostel)))
-    }, [])
+    }, [showComplaintFields])
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault()
@@ -90,58 +92,62 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
                 </select>
             </div>
 
-            <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', fontSize: '0.875rem' }}>
-                    {labels.registrationNumber}{required.includes('registrationNumber') && ' (Required)'}
-                </label>
-                <input
-                    className="input"
-                    value={registrationNumber}
-                    onChange={(e) => setRegistrationNumber(e.target.value)}
-                    required={required.includes('registrationNumber')}
-                />
-            </div>
+            {showComplaintFields && (
+                <>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', fontSize: '0.875rem' }}>
+                            {labels.registrationNumber}{required.includes('registrationNumber') && ' (Required)'}
+                        </label>
+                        <input
+                            className="input"
+                            value={registrationNumber}
+                            onChange={(e) => setRegistrationNumber(e.target.value)}
+                            required={required.includes('registrationNumber')}
+                        />
+                    </div>
 
-            <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', fontSize: '0.875rem' }}>
-                    {labels.hostelName}{required.includes('hostelName') && ' (Required)'}
-                </label>
-                <select
-                    className="input"
-                    value={hostelName}
-                    onChange={(e) => setHostelName(e.target.value)}
-                    required={required.includes('hostelName')}
-                >
-                    <option value="">{required.includes('hostelName') ? 'Select your hostel' : 'Not applicable'}</option>
-                    {hostels.map(h => (
-                        <option key={h.id} value={h.categoryLabel || h.name}>{h.categoryLabel || h.name}</option>
-                    ))}
-                </select>
-            </div>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', fontSize: '0.875rem' }}>
+                            {labels.hostelName}{required.includes('hostelName') && ' (Required)'}
+                        </label>
+                        <select
+                            className="input"
+                            value={hostelName}
+                            onChange={(e) => setHostelName(e.target.value)}
+                            required={required.includes('hostelName')}
+                        >
+                            <option value="">{required.includes('hostelName') ? 'Select your hostel' : 'Not applicable'}</option>
+                            {hostels.map(h => (
+                                <option key={h.id} value={h.categoryLabel || h.name}>{h.categoryLabel || h.name}</option>
+                            ))}
+                        </select>
+                    </div>
 
-            <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', fontSize: '0.875rem' }}>
-                    {labels.roomNumber}{required.includes('roomNumber') && ' (Required)'}
-                </label>
-                <input
-                    className="input"
-                    value={roomNumber}
-                    onChange={(e) => setRoomNumber(e.target.value)}
-                    required={required.includes('roomNumber')}
-                />
-            </div>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', fontSize: '0.875rem' }}>
+                            {labels.roomNumber}{required.includes('roomNumber') && ' (Required)'}
+                        </label>
+                        <input
+                            className="input"
+                            value={roomNumber}
+                            onChange={(e) => setRoomNumber(e.target.value)}
+                            required={required.includes('roomNumber')}
+                        />
+                    </div>
 
-            <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', fontSize: '0.875rem' }}>
-                    {labels.major}{required.includes('major') && ' (Required)'}
-                </label>
-                <input
-                    className="input"
-                    value={major}
-                    onChange={(e) => setMajor(e.target.value)}
-                    required={required.includes('major')}
-                />
-            </div>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', fontSize: '0.875rem' }}>
+                            {labels.major}{required.includes('major') && ' (Required)'}
+                        </label>
+                        <input
+                            className="input"
+                            value={major}
+                            onChange={(e) => setMajor(e.target.value)}
+                            required={required.includes('major')}
+                        />
+                    </div>
+                </>
+            )}
 
             <button type="submit" disabled={loading} className="btn btn-primary" style={{ alignSelf: 'flex-start' }}>
                 {loading ? 'Saving...' : 'Save Profile'}

@@ -48,6 +48,15 @@ ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "roomNumber" TEXT;
 ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "major" TEXT;
 ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "gender" TEXT;
 
+-- Supervisor (Dept Officer) management: a direct contact number, an
+-- admin-controlled active/suspended switch (independent of email verification),
+-- and per-account action permissions so an admin can restrict which of the
+-- existing complaint actions a given officer is allowed to perform.
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "phone" TEXT;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "isActive" BOOLEAN NOT NULL DEFAULT true;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "permissions" JSONB NOT NULL DEFAULT
+    '{"canClaim":true,"canResolve":true,"canEscalate":true,"canReject":true,"canReroute":true}'::jsonb;
+
 CREATE TABLE IF NOT EXISTS "Complaint" (
     id                  TEXT PRIMARY KEY,
     title               TEXT NOT NULL,

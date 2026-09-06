@@ -1,0 +1,38 @@
+.factGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.factHeading {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted-foreground);
+    margin-bottom: 0.625rem;
+}
+
+.factRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.75rem;
+    font-size: 0.875rem;
+    padding: 0.375rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.factRow:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.factLabel {
+    color: var(--muted-foreground);
+}
+
+.factValue {
+    font-weight: 600;
+}

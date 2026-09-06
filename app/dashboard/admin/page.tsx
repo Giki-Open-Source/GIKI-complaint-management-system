@@ -63,24 +63,14 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
-                <div className="card" style={{ textAlign: 'center' }}>
-                    <h3 style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>Total Complaints</h3>
-                    <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{totalComplaints}</div>
-                </div>
-                <div className="card" style={{ textAlign: 'center' }}>
-                    <h3 style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>Resolved</h3>
-                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#22c55e' }}>{resolvedComplaints}</div>
-                </div>
-                <div className="card" style={{ textAlign: 'center' }}>
-                    <h3 style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>Pending</h3>
-                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#eab308' }}>{pendingComplaints}</div>
-                </div>
+            <div className="card" style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', padding: '1rem 1.25rem', marginBottom: '1.5rem' }}>
+                <MiniStat label="Total Complaints" value={totalComplaints} />
+                <MiniStat label="Resolved" value={resolvedComplaints} color="#22c55e" />
+                <MiniStat label="Pending" value={pendingComplaints} color="#eab308" />
             </div>
 
             <div className="card" style={{ marginBottom: '1.5rem' }}>
-                <h3 style={{ fontWeight: '600', marginBottom: '1rem' }}>Filters</h3>
-                <div style={{ display: 'flex', gap: '1rem' }}>
+                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                     <Link href="/dashboard/admin" className="btn btn-outline" style={{ opacity: !status ? 1 : 0.5 }}>All</Link>
                     <Link href="/dashboard/admin?status=SUBMITTED" className="btn btn-outline" style={{ opacity: status === 'SUBMITTED' ? 1 : 0.5 }}>Submitted</Link>
                     <Link href="/dashboard/admin?status=IN_PROGRESS" className="btn btn-outline" style={{ opacity: status === 'IN_PROGRESS' ? 1 : 0.5 }}>In Progress</Link>
@@ -143,6 +133,15 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
                     ))
                 )}
             </div>
+        </div>
+    )
+}
+
+function MiniStat({ label, value, color }: { label: string; value: number; color?: string }) {
+    return (
+        <div>
+            <div className="text-muted" style={{ fontSize: '0.75rem' }}>{label}</div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 700, color: color || undefined }}>{value}</div>
         </div>
     )
 }

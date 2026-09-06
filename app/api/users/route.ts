@@ -5,6 +5,7 @@ import { cookies } from 'next/headers'
 import { randomUUID } from 'crypto'
 import { z } from 'zod'
 import { Role } from '@/lib/enums'
+import { normalizePermissions } from '@/lib/permissions'
 
 const createUserSchema = z.object({
     name: z.string().min(2),
@@ -12,6 +13,8 @@ const createUserSchema = z.object({
     password: z.string().min(6),
     role: z.nativeEnum(Role),
     departmentId: z.string().optional(),
+    phone: z.string().optional(),
+    permissions: z.record(z.string(), z.boolean()).optional(),
 })
 
 export async function POST(request: Request) {
@@ -35,11 +38,13 @@ export async function POST(request: Request) {
 
         const hashedPassword = await hashPassword(data.password)
 
+        // Admin is vouching for this account directly, so it's created already
+        // verified -- there is no self-registration OTP step to go through.
         const { rows } = await query(
-            `INSERT INTO "User" (id, name, email, password, role, "departmentId")
-             VALUES ($1, $2, $3, $4, $5, $6)
-             RETURNING id, name, email, role, "departmentId", "emailVerified", "createdAt", "updatedAt"`,
-            [randomUUID(), data.name, data.email, hashedPassword, data.role, data.departmentId || null]
+            `INSERT INTO "User" (id, name, email, password, role, "departmentId", phone, permissions, "emailVerified")
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, now())
+             RETURNING id, name, email, role, "departmentId", phone, permissions, "isActive", "emailVerified", "createdAt", "updatedAt"`,
+            [randomUUID(), data.name, data.email, hashedPassword, data.role, data.departmentId || null, data.phone || null, JSON.stringify(normalizePermissions(data.permissions))]
         )
 
         return NextResponse.json({ user: rows[0] })
