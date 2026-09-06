@@ -53,9 +53,9 @@ export default function ExportButtons({ endpoint, params }: { endpoint: string; 
                 onClick={() => download('csv')}
                 disabled={busy !== null}
                 className="btn btn-outline"
-                style={{ padding: '0.375rem 0.75rem', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.375rem' }}
+                style={{ gap: '0.5rem' }}
             >
-                <Download size={14} />
+                <Download size={16} />
                 {busy === 'csv' ? 'Preparing…' : 'CSV'}
             </button>
             <button
@@ -63,9 +63,9 @@ export default function ExportButtons({ endpoint, params }: { endpoint: string; 
                 onClick={() => download('pdf')}
                 disabled={busy !== null}
                 className="btn btn-outline"
-                style={{ padding: '0.375rem 0.75rem', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.375rem' }}
+                style={{ gap: '0.5rem' }}
             >
-                <Download size={14} />
+                <Download size={16} />
                 {busy === 'pdf' ? 'Preparing…' : 'PDF'}
             </button>
         </div>
