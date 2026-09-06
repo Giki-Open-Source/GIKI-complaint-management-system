@@ -5,7 +5,7 @@ import { query } from '@/lib/db'
 // pre-auth on both the submit form and the register form (Dept Officer picker).
 export async function GET() {
     const { rows: departments } = await query(
-        `SELECT id, name, "categoryLabel", "defaultPriority", "slaHours", "escalationContactName", "escalationContactTitle"
+        `SELECT id, name, "categoryLabel", "defaultPriority", "slaHours", "escalationContactName", "escalationContactTitle", "isHostel"
          FROM "Department" ORDER BY "categoryLabel" ASC`
     )
 

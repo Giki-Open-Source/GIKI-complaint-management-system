@@ -27,6 +27,7 @@ export interface Department {
     slaHours: number
     escalationContactName: string | null
     escalationContactTitle: string | null
+    isHostel: boolean
 }
 
 export interface Complaint {

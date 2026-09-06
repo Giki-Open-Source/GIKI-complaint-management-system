@@ -41,7 +41,7 @@ export default async function SubmitComplaintPage() {
     return (
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
             <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1.5rem' }}>Submit a Complaint</h1>
-            <SubmitForm />
+            <SubmitForm hostelName={profile.hostelName} />
         </div>
     )
 }
