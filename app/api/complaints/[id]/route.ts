@@ -4,6 +4,7 @@ import { getUserFromToken } from '@/lib/auth'
 import { cookies } from 'next/headers'
 import { randomUUID } from 'crypto'
 import { z } from 'zod'
+import { normalizePermissions } from '@/lib/permissions'
 
 const updateSchema = z.object({
     status: z.enum(['IN_PROGRESS', 'ESCALATED', 'RESOLVED', 'REJECTED']).optional(),
@@ -55,6 +56,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
                 return NextResponse.json({ error: 'Can only reroute a complaint that has not been claimed yet' }, { status: 400 })
             }
 
+            if (user.role === 'DEPT_OFFICER' && !normalizePermissions(user.permissions).canReroute) {
+                return NextResponse.json({ error: 'You do not have permission to reroute complaints' }, { status: 403 })
+            }
+
             const client = await pool.connect()
             let rerouted
             try {
@@ -82,6 +87,25 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
         if (!status) {
             return NextResponse.json({ error: 'status is required' }, { status: 400 })
+        }
+
+        // Fine-grained per-officer permission gate. Re-sending the current status
+        // (the "save internal notes" form does this) isn't a real transition, so
+        // it's exempt -- only an actual claim/resolve/escalate/reject needs the
+        // matching permission. Admins are never gated by this.
+        if (user.role === 'DEPT_OFFICER') {
+            const permissions = normalizePermissions(user.permissions)
+            const permissionKeyByStatus: Record<string, keyof typeof permissions> = {
+                IN_PROGRESS: 'canClaim',
+                RESOLVED: 'canResolve',
+                ESCALATED: 'canEscalate',
+                REJECTED: 'canReject',
+            }
+            const isRedundantResend = status === complaint.status
+            const requiredKey = permissionKeyByStatus[status]
+            if (requiredKey && !isRedundantResend && !permissions[requiredKey]) {
+                return NextResponse.json({ error: `You do not have permission to perform this action (${requiredKey})` }, { status: 403 })
+            }
         }
 
         // Logic for transitions

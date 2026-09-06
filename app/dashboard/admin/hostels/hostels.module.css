@@ -1,0 +1,276 @@
+/* Clean enterprise data-grid look (Odoo / NetSuite / SAP Business One style) for
+   the Hostel Complaints module -- flat, dense, functional, dark. Scoped to this
+   page only. */
+
+.page {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    font-size: 13px;
+    color: #f2f3f5;
+    background: #000000;
+    border: 1px solid #2e3136;
+    padding: 14px;
+}
+
+.titleBar {
+    padding: 0 0 10px 0;
+    margin-bottom: 12px;
+    border-bottom: 2px solid #3b82f6;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+.titleBar > span:first-child {
+    font-weight: 700;
+    font-size: 15px;
+    color: #ffffff;
+    letter-spacing: 0.2px;
+}
+
+.panel {
+    background: #131417;
+    border: 1px solid #2e3136;
+    border-radius: 2px;
+    padding: 12px;
+    margin-bottom: 12px;
+}
+
+.panelHeading {
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #9aa0aa;
+    border-bottom: 1px solid #2e3136;
+    padding-bottom: 6px;
+    margin-bottom: 10px;
+}
+
+.filterGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 10px 14px;
+    margin-bottom: 10px;
+}
+
+.filterField label {
+    display: block;
+    font-weight: 600;
+    font-size: 11px;
+    margin-bottom: 3px;
+    color: #9aa0aa;
+}
+
+.filterField select,
+.filterField input {
+    width: 100%;
+    padding: 5px 7px;
+    font-size: 13px;
+    font-family: inherit;
+    border: 1px solid #3a3d42;
+    border-radius: 2px;
+    background: #000000;
+    color: #f2f3f5;
+}
+
+.filterField select:focus,
+.filterField input:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+.toolbar {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    align-items: center;
+    border-top: 1px solid #2e3136;
+    padding-top: 10px;
+}
+
+.recordCount {
+    margin-right: auto;
+    font-size: 12px;
+    color: #9aa0aa;
+}
+
+.btnErp {
+    background: #3b82f6;
+    border: 1px solid #3b82f6;
+    border-radius: 2px;
+    padding: 6px 18px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #ffffff;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.btnErp:hover {
+    background: #2f6fd6;
+    border-color: #2f6fd6;
+}
+
+.linkBtn {
+    display: inline-block;
+    background: #1b1c20;
+    border: 1px solid #3a3d42;
+    border-radius: 2px;
+    padding: 6px 18px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #f2f3f5;
+    text-decoration: none;
+}
+
+.linkBtn:hover {
+    background: #232428;
+}
+
+.tableWrap {
+    overflow-x: auto;
+    border: 1px solid #2e3136;
+    border-radius: 2px;
+    background: #0a0a0b;
+}
+
+.grid {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 12.5px;
+    min-width: 1100px;
+}
+
+.grid thead th {
+    background: #1b1c20;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    text-align: left;
+    padding: 8px;
+    border-bottom: 2px solid #3b82f6;
+    border-right: 1px solid #2e3136;
+    white-space: nowrap;
+}
+
+.grid thead th:last-child {
+    border-right: none;
+}
+
+.grid tbody td {
+    padding: 6px 8px;
+    border-bottom: 1px solid #202226;
+    border-right: 1px solid #202226;
+    white-space: nowrap;
+    color: #e6e8eb;
+}
+
+.grid tbody td:last-child {
+    border-right: none;
+}
+
+.grid tbody tr {
+    background: #0a0a0b;
+}
+
+.grid tbody tr:nth-child(even) {
+    background: #131417;
+}
+
+.grid tbody tr:hover {
+    background: #1a2a44;
+}
+
+.rowNo {
+    text-align: center;
+    color: #6b7280;
+    width: 32px;
+}
+
+.viewLink {
+    color: #6fa8ff;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.viewLink:hover {
+    text-decoration: underline;
+}
+
+.statusBadge {
+    display: inline-block;
+    padding: 2px 7px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    border-radius: 2px;
+    color: #ffffff;
+    white-space: nowrap;
+}
+
+.statusSubmitted { background: #3568a8; }
+.statusInProgress { background: #a06a1a; }
+.statusEscalated { background: #a5322a; }
+.statusResolved { background: #237a4f; }
+.statusClosed { background: #5c4a94; }
+.statusRejected { background: #5a6169; }
+
+.noRecords {
+    text-align: center;
+    padding: 28px;
+    color: #9aa0aa;
+    font-style: italic;
+    background: #0a0a0b;
+    border: 1px solid #2e3136;
+    border-top: none;
+    border-radius: 0 0 2px 2px;
+}
+
+.footerBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    background: #131417;
+    border: 1px solid #2e3136;
+    border-top: none;
+    border-radius: 0 0 2px 2px;
+    padding: 8px 10px;
+    font-size: 12px;
+    color: #d0d3d8;
+}
+
+.pageLinks a,
+.pageLinks span {
+    display: inline-block;
+    min-width: 22px;
+    text-align: center;
+    padding: 3px 7px;
+    margin-left: 4px;
+    border: 1px solid #3a3d42;
+    border-radius: 2px;
+    background: #000000;
+    color: #f2f3f5;
+    text-decoration: none;
+    font-size: 12px;
+}
+
+.pageLinks .current {
+    background: #3b82f6;
+    border-color: #3b82f6;
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.pageLinks .disabled {
+    color: #4b5058;
+    border-color: #202226;
+}
+
+.pageLinks a:hover {
+    background: #1a2a44;
+    border-color: #3b82f6;
+}

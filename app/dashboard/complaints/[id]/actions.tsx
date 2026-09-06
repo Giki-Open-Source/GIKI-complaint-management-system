@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { OfficerPermissions } from '@/lib/permissions'
 
 interface DepartmentOption {
     id: string
@@ -17,9 +18,12 @@ interface ComplaintActionsProps {
     isDeptOfficer: boolean
     isComplainant: boolean
     departments: DepartmentOption[]
+    /** null means unrestricted (admin) -- otherwise the acting officer's own permission flags. */
+    permissions: OfficerPermissions | null
 }
 
-export default function ComplaintActions({ complaintId, currentStatus, isAssignedOfficer, isAdmin, isDeptOfficer, isComplainant, departments }: ComplaintActionsProps) {
+export default function ComplaintActions({ complaintId, currentStatus, isAssignedOfficer, isAdmin, isDeptOfficer, isComplainant, departments, permissions }: ComplaintActionsProps) {
+    const can = (key: keyof OfficerPermissions) => permissions === null || permissions[key]
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [showResolve, setShowResolve] = useState(false)
@@ -143,48 +147,58 @@ export default function ComplaintActions({ complaintId, currentStatus, isAssigne
                     <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                         {currentStatus === 'SUBMITTED' && (
                             <>
-                                <button
-                                    onClick={() => handleStatusChange('IN_PROGRESS')}
-                                    disabled={loading}
-                                    className="btn btn-primary"
-                                >
-                                    Claim Complaint
-                                </button>
-                                <button
-                                    onClick={() => setShowReject(!showReject)}
-                                    disabled={loading}
-                                    className="btn btn-outline"
-                                >
-                                    Reject
-                                </button>
-                                <button
-                                    onClick={() => setShowReroute(!showReroute)}
-                                    disabled={loading}
-                                    className="btn btn-outline"
-                                >
-                                    Reroute
-                                </button>
+                                {can('canClaim') && (
+                                    <button
+                                        onClick={() => handleStatusChange('IN_PROGRESS')}
+                                        disabled={loading}
+                                        className="btn btn-primary"
+                                    >
+                                        Claim Complaint
+                                    </button>
+                                )}
+                                {can('canReject') && (
+                                    <button
+                                        onClick={() => setShowReject(!showReject)}
+                                        disabled={loading}
+                                        className="btn btn-outline"
+                                    >
+                                        Reject
+                                    </button>
+                                )}
+                                {can('canReroute') && (
+                                    <button
+                                        onClick={() => setShowReroute(!showReroute)}
+                                        disabled={loading}
+                                        className="btn btn-outline"
+                                    >
+                                        Reroute
+                                    </button>
+                                )}
                             </>
                         )}
 
                         {(currentStatus === 'IN_PROGRESS' || currentStatus === 'ESCALATED') && (
                             <>
-                                <button
-                                    onClick={() => setShowResolve(!showResolve)}
-                                    disabled={loading}
-                                    className="btn"
-                                    style={{ backgroundColor: '#22c55e', color: 'white' }}
-                                >
-                                    Resolve
-                                </button>
-                                <button
-                                    onClick={() => setShowEscalate(!showEscalate)}
-                                    disabled={loading}
-                                    className="btn"
-                                    style={{ backgroundColor: '#ef4444', color: 'white' }}
-                                >
-                                    Escalate
-                                </button>
+                                {can('canResolve') && (
+                                    <button
+                                        onClick={() => setShowResolve(!showResolve)}
+                                        disabled={loading}
+                                        className="btn"
+                                        style={{ backgroundColor: '#22c55e', color: 'white' }}
+                                    >
+                                        Resolve
+                                    </button>
+                                )}
+                                {can('canEscalate') && (
+                                    <button
+                                        onClick={() => setShowEscalate(!showEscalate)}
+                                        disabled={loading}
+                                        className="btn"
+                                        style={{ backgroundColor: '#ef4444', color: 'white' }}
+                                    >
+                                        Escalate
+                                    </button>
+                                )}
                             </>
                         )}
 

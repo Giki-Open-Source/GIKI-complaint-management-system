@@ -17,7 +17,7 @@ export async function getUserFromToken(token: string) {
     if (!payload) return null
 
     const { rows } = await query(
-        'SELECT id, email, role, name, "departmentId" FROM "User" WHERE id = $1',
+        'SELECT id, email, role, name, "departmentId", phone, "isActive", permissions FROM "User" WHERE id = $1',
         [payload.userId]
     )
 

@@ -74,24 +74,11 @@ export default async function DepartmentDashboard({ searchParams }: { searchPara
                 </div>
             </div>
 
-            {/* Stats Overview */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
-                <div className="card" style={{ padding: '1.5rem' }}>
-                    <div className="text-muted text-sm">Total Complaints</div>
-                    <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{total}</div>
-                </div>
-                <div className="card" style={{ padding: '1.5rem', borderLeft: '4px solid #3b82f6' }}>
-                    <div className="text-muted text-sm">Pending</div>
-                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#3b82f6' }}>{pending}</div>
-                </div>
-                <div className="card" style={{ padding: '1.5rem', borderLeft: '4px solid #eab308' }}>
-                    <div className="text-muted text-sm">In Progress</div>
-                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#eab308' }}>{inProgress}</div>
-                </div>
-                <div className="card" style={{ padding: '1.5rem', borderLeft: '4px solid #22c55e' }}>
-                    <div className="text-muted text-sm">Resolved</div>
-                    <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#22c55e' }}>{resolved}</div>
-                </div>
+            <div className="card" style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap', padding: '1rem 1.25rem', marginBottom: '1.5rem' }}>
+                <MiniStat label="Total" value={total} />
+                <MiniStat label="Pending" value={pending} color="#3b82f6" />
+                <MiniStat label="In Progress" value={inProgress} color="#eab308" />
+                <MiniStat label="Resolved" value={resolved} color="#22c55e" />
             </div>
 
             <DashboardControls />
@@ -171,27 +158,15 @@ export default async function DepartmentDashboard({ searchParams }: { searchPara
                     })
                 )}
             </div>
+        </div>
+    )
+}
 
-            {/* Helping Logic / Tips Section */}
-            <div style={{ marginTop: '3rem', padding: '1.5rem', backgroundColor: 'var(--secondary)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
-                <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    💡 Officer Guidelines
-                </h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>
-                    <div>
-                        <strong style={{ color: 'var(--foreground)', display: 'block', marginBottom: '0.25rem' }}>1. Claiming Complaints</strong>
-                        <p>Always "Claim" a complaint before working on it to avoid duplicate efforts by other officers.</p>
-                    </div>
-                    <div>
-                        <strong style={{ color: 'var(--foreground)', display: 'block', marginBottom: '0.25rem' }}>2. Resolution</strong>
-                        <p>Provide a clear and concise resolution summary. This is visible to the student.</p>
-                    </div>
-                    <div>
-                        <strong style={{ color: 'var(--foreground)', display: 'block', marginBottom: '0.25rem' }}>3. Escalation</strong>
-                        <p>Only escalate if the issue requires higher authority approval or resources beyond your department.</p>
-                    </div>
-                </div>
-            </div>
+function MiniStat({ label, value, color }: { label: string; value: number; color?: string }) {
+    return (
+        <div>
+            <div className="text-muted" style={{ fontSize: '0.75rem' }}>{label}</div>
+            <div style={{ fontSize: '1.25rem', fontWeight: 700, color: color || undefined }}>{value}</div>
         </div>
     )
 }

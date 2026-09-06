@@ -24,6 +24,10 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Please verify your email before logging in' }, { status: 403 })
         }
 
+        if (user.isActive === false) {
+            return NextResponse.json({ error: 'This account has been suspended. Contact an administrator.' }, { status: 403 })
+        }
+
         const token = signToken({
             userId: user.id,
             email: user.email,

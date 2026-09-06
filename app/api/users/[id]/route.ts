@@ -4,11 +4,17 @@ import { getUserFromToken } from '@/lib/auth'
 import { cookies } from 'next/headers'
 import { z } from 'zod'
 import { Role } from '@/lib/enums'
+import { normalizePermissions } from '@/lib/permissions'
 
 const updateUserSchema = z.object({
     role: z.nativeEnum(Role).optional(),
     departmentId: z.string().nullable().optional(),
+    phone: z.string().nullable().optional(),
+    isActive: z.boolean().optional(),
+    permissions: z.record(z.string(), z.boolean()).optional(),
 })
+
+const RETURN_COLUMNS = `id, name, email, role, "departmentId", phone, "isActive", permissions, "emailVerified", "createdAt", "updatedAt"`
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
     const cookieStore = await cookies()
@@ -27,12 +33,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         const updates: Record<string, unknown> = {}
         if (data.role) updates.role = data.role
         if (data.departmentId !== undefined) updates.departmentId = data.departmentId
+        if (data.phone !== undefined) updates.phone = data.phone
+        if (data.isActive !== undefined) updates.isActive = data.isActive
+        if (data.permissions !== undefined) updates.permissions = JSON.stringify(normalizePermissions(data.permissions))
 
         if (Object.keys(updates).length === 0) {
-            const { rows } = await query(
-                'SELECT id, name, email, role, "departmentId", "emailVerified", "createdAt", "updatedAt" FROM "User" WHERE id = $1',
-                [id]
-            )
+            const { rows } = await query(`SELECT ${RETURN_COLUMNS} FROM "User" WHERE id = $1`, [id])
             return NextResponse.json({ user: rows[0] })
         }
 
@@ -40,13 +46,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         const values: unknown[] = []
         for (const [column, value] of Object.entries(updates)) {
             values.push(value)
-            setClauses.push(`"${column}" = $${values.length}`)
+            setClauses.push(column === 'permissions' ? `"${column}" = $${values.length}::jsonb` : `"${column}" = $${values.length}`)
         }
         values.push(id)
 
         const { rows } = await query(
             `UPDATE "User" SET ${setClauses.join(', ')} WHERE id = $${values.length}
-             RETURNING id, name, email, role, "departmentId", "emailVerified", "createdAt", "updatedAt"`,
+             RETURNING ${RETURN_COLUMNS}`,
             values
         )
 

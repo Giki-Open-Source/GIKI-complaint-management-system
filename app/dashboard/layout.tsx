@@ -5,7 +5,7 @@ import { cookies } from 'next/headers'
 import { getUserFromToken } from '@/lib/auth'
 import { query } from '@/lib/db'
 import { isProfileComplete } from '@/lib/profile'
-import { UserCircle, LayoutDashboard, FilePlus2, ClipboardList, Inbox, ShieldCheck, Users, BarChart3, Settings } from 'lucide-react'
+import { UserCircle, LayoutDashboard, FilePlus2, ClipboardList, Inbox, ShieldCheck, Users, BarChart3, Settings, Building2, UserCog } from 'lucide-react'
 import styles from './dashboard.module.css'
 import DashboardLayoutClient from './layout-client'
 import SignOutButton from './sign-out-button'
@@ -73,6 +73,14 @@ export default async function DashboardLayout({ children }: { children: ReactNod
                         <Link href="/dashboard/admin/users" className={styles.navItem}>
                             <Users size={18} />
                             Manage Users
+                        </Link>
+                        <Link href="/dashboard/admin/hostels" className={styles.navItem}>
+                            <Building2 size={18} />
+                            Hostel Complaints
+                        </Link>
+                        <Link href="/dashboard/admin/supervisors" className={styles.navItem}>
+                            <UserCog size={18} />
+                            Supervisors
                         </Link>
                         <Link href="/dashboard/admin/reports" className={styles.navItem}>
                             <BarChart3 size={18} />
