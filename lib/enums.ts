@@ -21,3 +21,8 @@ export enum Priority {
     HIGH = 'HIGH',
     CRITICAL = 'CRITICAL'
 }
+
+export enum Gender {
+    MALE = 'MALE',
+    FEMALE = 'FEMALE'
+}

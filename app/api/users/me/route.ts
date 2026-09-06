@@ -3,12 +3,14 @@ import { query } from '@/lib/db'
 import { getUserFromToken, comparePassword } from '@/lib/auth'
 import { cookies } from 'next/headers'
 import { z } from 'zod'
+import { Gender } from '@/lib/enums'
 
 const profileSchema = z.object({
     registrationNumber: z.string().min(1).optional(),
     hostelName: z.string().min(1).optional(),
     roomNumber: z.string().min(1).optional(),
     major: z.string().min(1).optional(),
+    gender: z.nativeEnum(Gender).optional(),
 })
 
 export async function GET() {
@@ -21,7 +23,7 @@ export async function GET() {
     }
 
     const { rows } = await query(
-        `SELECT id, name, email, role, "departmentId", "registrationNumber", "hostelName", "roomNumber", "major"
+        `SELECT id, name, email, role, "departmentId", "registrationNumber", "hostelName", "roomNumber", "major", "gender"
          FROM "User" WHERE id = $1`,
         [user.id]
     )
@@ -56,7 +58,7 @@ export async function PATCH(request: Request) {
         values.push(user.id)
         const { rows } = await query(
             `UPDATE "User" SET ${setClauses.join(', ')} WHERE id = $${values.length}
-             RETURNING id, name, email, role, "departmentId", "registrationNumber", "hostelName", "roomNumber", "major"`,
+             RETURNING id, name, email, role, "departmentId", "registrationNumber", "hostelName", "roomNumber", "major", "gender"`,
             values
         )
 

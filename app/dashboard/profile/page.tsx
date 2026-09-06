@@ -14,7 +14,7 @@ export default async function ProfilePage() {
     }
 
     const { rows } = await query(
-        `SELECT id, name, email, role, "registrationNumber", "hostelName", "roomNumber", "major"
+        `SELECT id, name, email, role, "registrationNumber", "hostelName", "roomNumber", "major", "gender"
          FROM "User" WHERE id = $1`,
         [user.id]
     )
