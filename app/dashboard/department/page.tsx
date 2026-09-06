@@ -28,6 +28,10 @@ export default async function DepartmentDashboard({ searchParams }: { searchPara
     }
     const whereSql = conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''
 
+    const ownDepartmentName = user.departmentId
+        ? (await query('SELECT "categoryLabel", name FROM "Department" WHERE id = $1', [user.departmentId])).rows[0]
+        : null
+
     const orderBySql = resolvedParams.sort === 'oldest'
         ? `c."createdAt" ASC`
         : resolvedParams.sort === 'newest'
@@ -66,7 +70,7 @@ export default async function DepartmentDashboard({ searchParams }: { searchPara
                 </div>
                 <div style={{ textAlign: 'right' }}>
                     <div style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>Current Department</div>
-                    <div style={{ fontWeight: '600' }}>{user.departmentId || 'All Departments'}</div>
+                    <div style={{ fontWeight: '600' }}>{ownDepartmentName ? (ownDepartmentName.categoryLabel || ownDepartmentName.name) : 'All Departments'}</div>
                 </div>
             </div>
 

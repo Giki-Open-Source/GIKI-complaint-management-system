@@ -16,7 +16,10 @@ const registerSchema = z.object({
     name: z.string().min(2),
     role: z.enum([Role.STUDENT, Role.FACULTY, Role.STAFF, Role.DEPT_OFFICER]).optional(),
     departmentId: z.string().optional(),
-})
+}).refine(
+    data => data.role !== Role.DEPT_OFFICER || !!data.departmentId,
+    { message: 'Department is required for Department Officer accounts', path: ['departmentId'] }
+)
 
 export async function POST(request: Request) {
     try {
