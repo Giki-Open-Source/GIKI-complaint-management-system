@@ -10,7 +10,7 @@ export function ToggleSwitch({ checked, onChange, label, description }: {
     description?: string
 }) {
     return (
-        <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer', padding: '0.625rem', backgroundColor: 'var(--secondary)', borderRadius: 'var(--radius)' }}>
+        <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer', padding: '0.625rem', backgroundColor: 'var(--secondary)', borderRadius: 0 }}>
             <span style={{ position: 'relative', flexShrink: 0, width: '36px', height: '20px', marginTop: '0.15rem' }}>
                 <input
                     type="checkbox"
@@ -18,8 +18,8 @@ export function ToggleSwitch({ checked, onChange, label, description }: {
                     onChange={(e) => onChange(e.target.checked)}
                     style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', margin: 0, opacity: 0, cursor: 'pointer', zIndex: 1 }}
                 />
-                <span style={{ position: 'absolute', inset: 0, borderRadius: '9999px', backgroundColor: checked ? '#22c55e' : 'var(--border)', transition: 'background-color 0.15s' }} />
-                <span style={{ position: 'absolute', top: '2px', left: checked ? '18px' : '2px', width: '16px', height: '16px', borderRadius: '50%', backgroundColor: '#fff', transition: 'left 0.15s' }} />
+                <span style={{ position: 'absolute', inset: 0, borderRadius: 0, backgroundColor: checked ? '#22c55e' : 'var(--border)', transition: 'background-color 0.15s' }} />
+                <span style={{ position: 'absolute', top: '2px', left: checked ? '18px' : '2px', width: '16px', height: '16px', borderRadius: 0, backgroundColor: '#fff', transition: 'left 0.15s' }} />
             </span>
             <span>
                 <strong style={{ fontSize: '0.8125rem' }}>{label}</strong>
@@ -48,7 +48,7 @@ export function ConfirmModal({ title, message, confirmLabel = 'Confirm', danger,
                         onClick={onConfirm}
                         disabled={loading}
                         className="btn"
-                        style={{ flex: 1, backgroundColor: danger ? '#ef4444' : 'var(--primary)', color: danger ? 'white' : 'var(--primary-foreground)' }}
+                        style={{ flex: 1, backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)', border: danger ? '1px solid var(--foreground)' : undefined }}
                     >
                         {loading ? 'Please wait…' : confirmLabel}
                     </button>
@@ -65,11 +65,13 @@ export function InlineBanner({ type, message }: { type: 'error' | 'success'; mes
     return (
         <div style={{
             padding: '0.625rem 0.875rem',
-            borderRadius: 'var(--radius)',
+            borderRadius: 0,
             fontSize: '0.8125rem',
             marginBottom: '1rem',
-            backgroundColor: type === 'error' ? 'rgba(239,68,68,0.1)' : 'rgba(34,197,94,0.1)',
-            color: type === 'error' ? '#ef4444' : '#22c55e',
+            border: '1px solid var(--border)',
+            backgroundColor: type === 'error' ? 'var(--secondary)' : 'rgba(34,197,94,0.1)',
+            color: type === 'error' ? 'var(--foreground)' : '#22c55e',
+            fontWeight: type === 'error' ? 600 : 400,
         }}>
             {message}
         </div>

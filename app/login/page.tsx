@@ -53,7 +53,7 @@ export default function LoginPage() {
                         alt="GIKI logo"
                         width={48}
                         height={48}
-                        style={{ borderRadius: '10px', marginBottom: '1rem' }}
+                        style={{ borderRadius: 0, marginBottom: '1rem' }}
                     />
                     <div style={{ fontSize: '0.875rem', fontWeight: '600', letterSpacing: '-0.02em', marginBottom: '1.25rem', color: 'var(--muted-foreground)' }}>GIKomplain</div>
                     <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>Welcome back</h1>
@@ -65,7 +65,7 @@ export default function LoginPage() {
                         backgroundColor: 'rgba(239, 68, 68, 0.1)',
                         color: '#ef4444',
                         padding: '0.75rem',
-                        borderRadius: 'var(--radius)',
+                        borderRadius: 0,
                         marginBottom: '1.5rem',
                         fontSize: '0.875rem',
                         border: '1px solid rgba(239, 68, 68, 0.2)'

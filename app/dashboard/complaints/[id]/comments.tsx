@@ -56,7 +56,7 @@ export default function CommentsSection({ complaintId, initialComments, currentU
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
                 {comments.length === 0 ? (
-                    <div style={{ padding: '1rem', textAlign: 'center', color: 'var(--muted-foreground)', border: '1px dashed var(--border)', borderRadius: 'var(--radius)' }}>
+                    <div style={{ padding: '1rem', textAlign: 'center', color: 'var(--muted-foreground)', border: '1px dashed var(--border)', borderRadius: 0 }}>
                         No comments yet. Start the conversation.
                     </div>
                 ) : (
@@ -68,7 +68,7 @@ export default function CommentsSection({ complaintId, initialComments, currentU
                                     <span style={{
                                         fontSize: '0.75rem',
                                         padding: '0.125rem 0.5rem',
-                                        borderRadius: '9999px',
+                                        borderRadius: 0,
                                         backgroundColor: comment.author.role === 'STUDENT' ? 'var(--muted)' : 'var(--accent)',
                                         color: comment.author.role === 'STUDENT' ? 'var(--muted-foreground)' : 'var(--accent-foreground)'
                                     }}>

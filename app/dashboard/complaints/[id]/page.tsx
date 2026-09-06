@@ -127,16 +127,16 @@ export default async function ComplaintDetailsPage({ params }: { params: Promise
                             </div>
                             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                                 {isOverdue && (
-                                    <span style={{ padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: '700', backgroundColor: '#ef4444', color: 'white' }}>
+                                    <span style={{ padding: '0.25rem 0.75rem', borderRadius: 0, fontSize: '0.75rem', fontWeight: '700', backgroundColor: '#ef4444', color: 'white' }}>
                                         OVERDUE
                                     </span>
                                 )}
-                                <span style={{ padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: '600', backgroundColor: getPriorityColor(complaint.priority), color: 'white' }}>
+                                <span style={{ padding: '0.25rem 0.75rem', borderRadius: 0, fontSize: '0.75rem', fontWeight: '600', backgroundColor: getPriorityColor(complaint.priority), color: 'white' }}>
                                     {complaint.priority}
                                 </span>
                                 <span style={{
                                     padding: '0.25rem 0.75rem',
-                                    borderRadius: '9999px',
+                                    borderRadius: 0,
                                     fontSize: '0.875rem',
                                     fontWeight: '600',
                                     backgroundColor: getStatusColor(complaint.status),
@@ -165,7 +165,7 @@ export default async function ComplaintDetailsPage({ params }: { params: Promise
                                             style={{
                                                 padding: '0.5rem 1rem',
                                                 border: '1px solid var(--border)',
-                                                borderRadius: 'var(--radius)',
+                                                borderRadius: 0,
                                                 fontSize: '0.875rem',
                                                 display: 'flex',
                                                 alignItems: 'center',
@@ -180,21 +180,21 @@ export default async function ComplaintDetailsPage({ params }: { params: Promise
                         )}
 
                         {complaint.resolutionSummary && (
-                            <div style={{ marginTop: '2rem', padding: '1.5rem', backgroundColor: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.2)', borderRadius: 'var(--radius)' }}>
+                            <div style={{ marginTop: '2rem', padding: '1.5rem', backgroundColor: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.2)', borderRadius: 0 }}>
                                 <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.5rem', color: '#16a34a' }}>Resolution</h3>
                                 <p>{complaint.resolutionSummary}</p>
                             </div>
                         )}
 
                         {complaint.rejectionReason && (
-                            <div style={{ marginTop: '2rem', padding: '1.5rem', backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: 'var(--radius)' }}>
+                            <div style={{ marginTop: '2rem', padding: '1.5rem', backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: 0 }}>
                                 <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.5rem', color: '#ef4444' }}>Rejected</h3>
                                 <p>{complaint.rejectionReason}</p>
                             </div>
                         )}
 
                         {isOfficerOrAdmin && complaint.internalNotes && (
-                            <div style={{ marginTop: '2rem', padding: '1.5rem', backgroundColor: 'var(--secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}>
+                            <div style={{ marginTop: '2rem', padding: '1.5rem', backgroundColor: 'var(--secondary)', border: '1px solid var(--border)', borderRadius: 0 }}>
                                 <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '0.5rem' }}>Internal Notes</h3>
                                 <p style={{ whiteSpace: 'pre-wrap', color: 'var(--muted-foreground)' }}>{complaint.internalNotes}</p>
                             </div>

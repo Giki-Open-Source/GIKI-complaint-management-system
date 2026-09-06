@@ -131,7 +131,7 @@ export default function RegisterPage() {
                         alt="GIKI logo"
                         width={48}
                         height={48}
-                        style={{ borderRadius: '10px', marginBottom: '1rem' }}
+                        style={{ borderRadius: 0, marginBottom: '1rem' }}
                     />
                     <div style={{ fontSize: '0.875rem', fontWeight: '600', letterSpacing: '-0.02em', marginBottom: '1.25rem', color: 'var(--muted-foreground)' }}>GIKomplain</div>
                     {step === 'form' ? (
@@ -152,7 +152,7 @@ export default function RegisterPage() {
                         backgroundColor: 'rgba(239, 68, 68, 0.1)',
                         color: '#ef4444',
                         padding: '0.75rem',
-                        borderRadius: 'var(--radius)',
+                        borderRadius: 0,
                         marginBottom: '1.5rem',
                         fontSize: '0.875rem',
                         border: '1px solid rgba(239, 68, 68, 0.2)'
@@ -166,7 +166,7 @@ export default function RegisterPage() {
                         backgroundColor: 'rgba(34, 197, 94, 0.1)',
                         color: '#16a34a',
                         padding: '0.75rem',
-                        borderRadius: 'var(--radius)',
+                        borderRadius: 0,
                         marginBottom: '1.5rem',
                         fontSize: '0.875rem',
                         border: '1px solid rgba(34, 197, 94, 0.2)'

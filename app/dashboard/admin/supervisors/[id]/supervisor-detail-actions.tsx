@@ -148,7 +148,7 @@ export default function SupervisorDetailActions({ supervisorId, phone, departmen
                 <button onClick={() => setConfirming(isActive ? 'suspend' : 'activate')} disabled={loading} className="btn btn-outline">
                     {isActive ? 'Suspend Account' : 'Activate Account'}
                 </button>
-                <button onClick={() => setConfirming('delete')} disabled={loading} className="btn" style={{ color: '#ef4444', border: '1px solid #ef4444', marginLeft: 'auto' }}>
+                <button onClick={() => setConfirming('delete')} disabled={loading} className="btn" style={{ color: 'var(--foreground)', border: '1px solid var(--foreground)', marginLeft: 'auto' }}>
                     Delete Supervisor
                 </button>
             </div>

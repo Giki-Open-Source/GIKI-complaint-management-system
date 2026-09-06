@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
 import { getUserFromToken } from '@/lib/auth'
 import { query } from '@/lib/db'
 import { getRequiredProfileFields } from '@/lib/profile'
@@ -11,6 +12,12 @@ export default async function ProfilePage() {
 
     if (!user) {
         return <div>Unauthorized</div>
+    }
+
+    // Admins have no complaint-routing profile of their own; account settings
+    // (name/password) live under Settings instead.
+    if (user.role === 'ADMIN') {
+        redirect('/dashboard/settings')
     }
 
     const { rows } = await query(

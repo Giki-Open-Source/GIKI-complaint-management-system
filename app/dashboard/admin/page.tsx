@@ -59,7 +59,6 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
                 <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>Global Oversight Dashboard</h1>
                 <div style={{ display: 'flex', gap: '1rem' }}>
                     <Link href="/dashboard/admin/users" className="btn btn-outline">Manage Users</Link>
-                    <Link href="/dashboard/admin/reports" className="btn btn-outline">Reports</Link>
                 </div>
             </div>
 
@@ -102,16 +101,16 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                                         {complaint.isOverdue && (
-                                            <span style={{ padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: '700', backgroundColor: '#ef4444', color: 'white' }}>
+                                            <span style={{ padding: '0.25rem 0.75rem', borderRadius: 0, fontSize: '0.75rem', fontWeight: '700', backgroundColor: '#ef4444', color: 'white' }}>
                                                 OVERDUE
                                             </span>
                                         )}
-                                        <span style={{ padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: '600', backgroundColor: getPriorityColor(complaint.priority), color: 'white' }}>
+                                        <span style={{ padding: '0.25rem 0.75rem', borderRadius: 0, fontSize: '0.75rem', fontWeight: '600', backgroundColor: getPriorityColor(complaint.priority), color: 'white' }}>
                                             {complaint.priority}
                                         </span>
                                         <span style={{
                                             padding: '0.25rem 0.75rem',
-                                            borderRadius: '9999px',
+                                            borderRadius: 0,
                                             fontSize: '0.75rem',
                                             fontWeight: '600',
                                             backgroundColor: getStatusColor(complaint.status),
