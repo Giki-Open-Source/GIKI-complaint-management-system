@@ -3,7 +3,7 @@ import { randomUUID } from 'crypto'
 import bcrypt from 'bcryptjs'
 import { Pool } from 'pg'
 
-const OLD_DEPARTMENT_NAMES = ['Computer Science', 'Electrical Engineering', 'Administration', 'Student Affairs', 'Maintenance', 'Hostel Maintenance']
+const OLD_DEPARTMENT_NAMES = ['Computer Science', 'Electrical Engineering', 'Administration', 'Student Affairs', 'Maintenance', 'Hostel Maintenance', 'Academic Facilities', 'Fee & Accounts', 'Transport & Security']
 
 const HOSTEL_NAMES = [
     'Hostel 1', 'Hostel 2', 'Hostel 3', 'Hostel 4', 'Hostel 5', 'Hostel 6',
@@ -27,10 +27,9 @@ const HOSTEL_DEPARTMENTS = HOSTEL_NAMES.map(name => ({
 const DEPARTMENTS = [
     { name: 'Mess & Dining', categoryLabel: 'Mess & Dining', defaultPriority: 'HIGH', slaHours: 24, escalationContactName: 'Dean of Student Affairs', escalationContactTitle: 'Dean of Student Affairs', isHostel: false },
     { name: 'Campus IT & Wi-Fi', categoryLabel: 'Campus IT & Wi-Fi', defaultPriority: 'HIGH', slaHours: 24, escalationContactName: 'Director IT', escalationContactTitle: 'Director IT', isHostel: false },
-    { name: 'Academic Facilities', categoryLabel: 'Academic Facilities', defaultPriority: 'MEDIUM', slaHours: 48, escalationContactName: 'Dean of Academics', escalationContactTitle: 'Dean of Academics', isHostel: false },
     { name: 'Campus Works & Utilities', categoryLabel: 'Campus Works & Utilities', defaultPriority: 'MEDIUM', slaHours: 72, escalationContactName: 'Director of Works & Services', escalationContactTitle: 'Director of Works & Services', isHostel: false },
-    { name: 'Transport & Security', categoryLabel: 'Transport & Security', defaultPriority: 'MEDIUM', slaHours: 48, escalationContactName: 'Chief Security Officer', escalationContactTitle: 'Chief Security Officer', isHostel: false },
-    { name: 'Fee & Accounts', categoryLabel: 'Fee & Accounts', defaultPriority: 'MEDIUM', slaHours: 72, escalationContactName: 'Treasurer / Registrar', escalationContactTitle: 'Treasurer / Registrar', isHostel: false },
+    { name: 'Campus Transport', categoryLabel: 'Campus Transport', defaultPriority: 'MEDIUM', slaHours: 48, escalationContactName: 'Chief Security Officer', escalationContactTitle: 'Chief Security Officer', isHostel: false },
+    { name: 'Campus Finance', categoryLabel: 'Campus Finance', defaultPriority: 'MEDIUM', slaHours: 72, escalationContactName: 'Treasurer / Registrar', escalationContactTitle: 'Treasurer / Registrar', isHostel: false },
     ...HOSTEL_DEPARTMENTS,
 ]
 
