@@ -46,7 +46,7 @@ export default function ComplaintAssignment({ complaintId, departments, officers
             e.preventDefault()
             setIsOpen(false)
         }}>
-            <div style={{ backgroundColor: 'white', padding: '1.5rem', borderRadius: '0.5rem', width: '400px', maxWidth: '90%' }} onClick={e => e.stopPropagation()}>
+            <div style={{ backgroundColor: 'white', padding: '1.5rem', borderRadius: 0, width: '400px', maxWidth: '90%' }} onClick={e => e.stopPropagation()}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                     <h3 style={{ fontWeight: 'bold', fontSize: '1.125rem' }}>Assign Complaint</h3>
                     <button onClick={() => setIsOpen(false)}><X size={20} /></button>
@@ -62,7 +62,7 @@ export default function ComplaintAssignment({ complaintId, departments, officers
                                 disabled={loading || currentDeptId === dept.id}
                                 style={{
                                     padding: '0.25rem 0.75rem',
-                                    borderRadius: '9999px',
+                                    borderRadius: 0,
                                     border: '1px solid #e2e8f0',
                                     backgroundColor: currentDeptId === dept.id ? '#eff6ff' : 'white',
                                     color: currentDeptId === dept.id ? '#2563eb' : 'inherit',
@@ -87,7 +87,7 @@ export default function ComplaintAssignment({ complaintId, departments, officers
                                 style={{
                                     textAlign: 'left',
                                     padding: '0.5rem',
-                                    borderRadius: '0.25rem',
+                                    borderRadius: 0,
                                     border: '1px solid #e2e8f0',
                                     backgroundColor: currentOfficerId === officer.id ? '#eff6ff' : 'white',
                                     color: currentOfficerId === officer.id ? '#2563eb' : 'inherit',

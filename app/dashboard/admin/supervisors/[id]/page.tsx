@@ -120,14 +120,14 @@ export default async function SupervisorDetailPage({ params }: { params: Promise
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
                             <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{supervisor.name}</h1>
                             <span style={{
-                                padding: '0.125rem 0.625rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 600,
-                                backgroundColor: supervisor.isActive ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)',
-                                color: supervisor.isActive ? '#22c55e' : '#ef4444',
+                                padding: '0.125rem 0.625rem', borderRadius: 0, fontSize: '0.75rem', fontWeight: 600,
+                                backgroundColor: supervisor.isActive ? 'rgba(34,197,94,0.15)' : 'var(--secondary)',
+                                color: supervisor.isActive ? '#22c55e' : 'var(--foreground)',
                             }}>
                                 {supervisor.isActive ? 'Active' : 'Suspended'}
                             </span>
                             {!supervisor.emailVerified && (
-                                <span style={{ padding: '0.125rem 0.625rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 600, backgroundColor: 'rgba(234,179,8,0.15)', color: '#eab308' }}>
+                                <span style={{ padding: '0.125rem 0.625rem', borderRadius: 0, fontSize: '0.75rem', fontWeight: 600, backgroundColor: 'rgba(234,179,8,0.15)', color: '#eab308' }}>
                                     Not Verified
                                 </span>
                             )}
@@ -151,7 +151,7 @@ export default async function SupervisorDetailPage({ params }: { params: Promise
                     <div className={styles.factHeading}>Department Queue</div>
                     <Fact label="Total in Queue" value={deptStats.total} />
                     <Fact label="Open Now" value={deptStats.open} />
-                    <Fact label="Overdue Now" value={deptStats.overdue} color={deptStats.overdue > 0 ? '#ef4444' : undefined} />
+                    <Fact label="Overdue Now" value={deptStats.overdue} color={deptStats.overdue > 0 ? '#eab308' : undefined} />
                 </div>
 
                 <div className="card">
@@ -166,7 +166,7 @@ export default async function SupervisorDetailPage({ params }: { params: Promise
                 <div className="card">
                     <div className={styles.factHeading}>Quality &amp; SLA</div>
                     <Fact label="Avg Resolution Time" value={resolution.avgResolutionHours != null ? `${resolution.avgResolutionHours}h` : '—'} />
-                    <Fact label="SLA Compliance" value={slaComplianceRate != null ? `${slaComplianceRate}%` : '—'} color={slaComplianceRate != null && slaComplianceRate < 70 ? '#ef4444' : undefined} />
+                    <Fact label="SLA Compliance" value={slaComplianceRate != null ? `${slaComplianceRate}%` : '—'} color={slaComplianceRate != null && slaComplianceRate < 70 ? '#eab308' : undefined} />
                     <Fact label="Reopened by Complainant" value={reopens} color={reopens > 0 ? '#eab308' : undefined} />
                 </div>
             </div>

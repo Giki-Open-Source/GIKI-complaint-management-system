@@ -34,7 +34,7 @@ export default async function MyComplaintsPage() {
                                     <div style={{ display: 'flex', gap: '0.375rem' }}>
                                         <span style={{
                                             padding: '0.25rem 0.75rem',
-                                            borderRadius: '9999px',
+                                            borderRadius: 0,
                                             fontSize: '0.75rem',
                                             fontWeight: '600',
                                             backgroundColor: getPriorityColor(complaint.priority),
@@ -44,7 +44,7 @@ export default async function MyComplaintsPage() {
                                         </span>
                                         <span style={{
                                             padding: '0.25rem 0.75rem',
-                                            borderRadius: '9999px',
+                                            borderRadius: 0,
                                             fontSize: '0.75rem',
                                             fontWeight: '600',
                                             backgroundColor: getStatusColor(complaint.status),

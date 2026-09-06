@@ -1,0 +1,129 @@
+.kpiStrip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 1.25rem;
+}
+
+.kpi {
+    background: var(--secondary);
+    padding: 0.75rem 1rem;
+    text-decoration: none;
+    display: block;
+}
+
+.kpi:hover {
+    background: var(--accent);
+}
+
+.kpiLabel {
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted-foreground);
+    white-space: nowrap;
+}
+
+.kpiValue {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-top: 0.125rem;
+}
+
+.panelGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 1.25rem;
+}
+
+.panel {
+    border: 1px solid var(--border);
+    background: var(--secondary);
+}
+
+.panelHead {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.75rem;
+    padding: 0.625rem 0.875rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.panelTitle {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.panelLink {
+    font-size: 0.75rem;
+    color: var(--muted-foreground);
+    text-decoration: none;
+}
+
+.panelLink:hover {
+    text-decoration: underline;
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.75rem;
+    padding: 0.5rem 0.875rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.8125rem;
+}
+
+.row:last-child {
+    border-bottom: none;
+}
+
+.rowMain {
+    min-width: 0;
+    flex: 1;
+}
+
+.rowTitle {
+    display: block;
+    font-weight: 500;
+    color: var(--foreground);
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rowTitle:hover {
+    text-decoration: underline;
+}
+
+.rowMeta {
+    font-size: 0.6875rem;
+    color: var(--muted-foreground);
+    margin-top: 0.125rem;
+}
+
+.rowSide {
+    font-size: 0.6875rem;
+    white-space: nowrap;
+    text-align: right;
+    color: var(--muted-foreground);
+}
+
+.flag {
+    font-weight: 700;
+    color: #eab308;
+}
+
+.empty {
+    padding: 1.25rem 0.875rem;
+    font-size: 0.8125rem;
+    color: var(--muted-foreground);
+    text-align: center;
+}

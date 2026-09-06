@@ -64,12 +64,12 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
     return (
         <form onSubmit={handleSubmit} className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
             {error && (
-                <div style={{ padding: '0.75rem', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', borderRadius: 'var(--radius)', fontSize: '0.875rem' }}>
+                <div style={{ padding: '0.75rem', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', borderRadius: 0, fontSize: '0.875rem' }}>
                     {error}
                 </div>
             )}
             {success && (
-                <div style={{ padding: '0.75rem', backgroundColor: 'rgba(34, 197, 94, 0.1)', color: '#16a34a', borderRadius: 'var(--radius)', fontSize: '0.875rem' }}>
+                <div style={{ padding: '0.75rem', backgroundColor: 'rgba(34, 197, 94, 0.1)', color: '#16a34a', borderRadius: 0, fontSize: '0.875rem' }}>
                     {success}
                 </div>
             )}

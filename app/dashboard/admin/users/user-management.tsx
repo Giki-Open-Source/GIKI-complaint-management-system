@@ -193,7 +193,7 @@ function AddUserModal({ onClose, departments }: { onClose: () => void, departmen
                 <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1.5rem' }}>Add New User</h2>
 
                 {error && (
-                    <div style={{ padding: '0.75rem', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', borderRadius: 'var(--radius)', marginBottom: '1rem' }}>
+                    <div style={{ padding: '0.75rem', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', borderRadius: 0, marginBottom: '1rem' }}>
                         {error}
                     </div>
                 )}

@@ -110,7 +110,7 @@ export default function SubmitForm({ hostelName }: { hostelName: string | null }
     return (
         <form onSubmit={handleSubmit} className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             {error && (
-                <div style={{ padding: '0.75rem', backgroundColor: '#fee2e2', color: '#dc2626', borderRadius: '0.5rem' }}>
+                <div style={{ padding: '0.75rem', backgroundColor: '#fee2e2', color: '#dc2626', borderRadius: 0 }}>
                     {error}
                 </div>
             )}

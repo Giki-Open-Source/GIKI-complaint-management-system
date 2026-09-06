@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { Search } from 'lucide-react'
 import { PERMISSION_DEFS, DEFAULT_PERMISSIONS } from '@/lib/permissions'
 import { ToggleSwitch, ConfirmModal, InlineBanner } from './ui'
+import ExportButtons from '../export-buttons'
 
 interface Supervisor {
     id: string
@@ -102,9 +103,15 @@ export default function SupervisorManagement({ initialSupervisors, departments }
                         <option key={d.id} value={d.id}>{d.name}</option>
                     ))}
                 </select>
-                <button onClick={() => setShowAddModal(true)} className="btn btn-primary" style={{ marginLeft: 'auto' }}>
-                    Add Supervisor
-                </button>
+                <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <ExportButtons
+                        endpoint="/api/export/supervisors"
+                        params={{ q: search.trim() || undefined, dept: deptFilter || undefined }}
+                    />
+                    <button onClick={() => setShowAddModal(true)} className="btn btn-primary">
+                        Add Supervisor
+                    </button>
+                </div>
             </div>
 
             <div className="card" style={{ padding: 0 }}>
@@ -113,7 +120,7 @@ export default function SupervisorManagement({ initialSupervisors, departments }
                         <thead>
                             <tr style={{ borderBottom: '1px solid var(--border)', textAlign: 'left' }}>
                                 {['Name', 'Contact', 'Hostel / Department', 'Assigned', 'Open', 'Resolved', 'Avg Rating', 'Actions'].map(h => (
-                                    <th key={h} style={{ padding: '0.875rem 1rem', color: 'var(--muted-foreground)', fontWeight: '500', fontSize: '0.8125rem', whiteSpace: 'nowrap' }}>{h}</th>
+                                    <th key={h} style={{ padding: '0.5rem 0.75rem', color: 'var(--muted-foreground)', fontWeight: '500', fontSize: '0.8125rem', whiteSpace: 'nowrap' }}>{h}</th>
                                 ))}
                             </tr>
                         </thead>
@@ -135,10 +142,10 @@ export default function SupervisorManagement({ initialSupervisors, departments }
                                             borderBottom: '1px solid var(--border)',
                                             opacity: s.isActive ? 1 : 0.5,
                                             cursor: 'pointer',
-                                            borderLeft: s.overdueNow > 0 ? '3px solid #ef4444' : '3px solid transparent',
+                                            borderLeft: s.overdueNow > 0 ? '3px solid #eab308' : '3px solid transparent',
                                         }}
                                     >
-                                        <td style={{ padding: '0.875rem 1rem' }}>
+                                        <td style={{ padding: '0.5rem 0.75rem' }}>
                                             <Link
                                                 href={`/dashboard/admin/supervisors/${s.id}`}
                                                 onClick={(e) => e.stopPropagation()}
@@ -150,19 +157,19 @@ export default function SupervisorManagement({ initialSupervisors, departments }
                                                 <div style={{ fontSize: '0.6875rem', color: '#eab308' }}>Not verified</div>
                                             )}
                                         </td>
-                                        <td style={{ padding: '0.875rem 1rem', fontSize: '0.8125rem', color: 'var(--muted-foreground)' }}>
+                                        <td style={{ padding: '0.5rem 0.75rem', fontSize: '0.8125rem', color: 'var(--muted-foreground)' }}>
                                             <div>{s.email}</div>
                                             <div>{s.phone || '—'}</div>
                                         </td>
-                                        <td style={{ padding: '0.875rem 1rem' }}>{s.deptName || <span style={{ color: '#eab308' }}>Unassigned</span>}</td>
-                                        <td style={{ padding: '0.875rem 1rem' }}>{s.totalAssigned}</td>
-                                        <td style={{ padding: '0.875rem 1rem' }}>
+                                        <td style={{ padding: '0.5rem 0.75rem' }}>{s.deptName || <span style={{ color: '#eab308' }}>Unassigned</span>}</td>
+                                        <td style={{ padding: '0.5rem 0.75rem' }}>{s.totalAssigned}</td>
+                                        <td style={{ padding: '0.5rem 0.75rem' }}>
                                             {s.openNow}
-                                            {s.overdueNow > 0 && <span style={{ marginLeft: '0.375rem', fontSize: '0.6875rem', fontWeight: 700, color: '#ef4444' }}>({s.overdueNow} overdue)</span>}
+                                            {s.overdueNow > 0 && <span style={{ marginLeft: '0.375rem', fontSize: '0.6875rem', fontWeight: 700, color: '#eab308' }}>({s.overdueNow} overdue)</span>}
                                         </td>
-                                        <td style={{ padding: '0.875rem 1rem' }}>{s.resolvedByThem}</td>
-                                        <td style={{ padding: '0.875rem 1rem' }}>{s.avgRating ? `★ ${s.avgRating}` : '—'}</td>
-                                        <td style={{ padding: '0.875rem 1rem' }} onClick={(e) => e.stopPropagation()}>
+                                        <td style={{ padding: '0.5rem 0.75rem' }}>{s.resolvedByThem}</td>
+                                        <td style={{ padding: '0.5rem 0.75rem' }}>{s.avgRating ? `★ ${s.avgRating}` : '—'}</td>
+                                        <td style={{ padding: '0.5rem 0.75rem' }} onClick={(e) => e.stopPropagation()}>
                                             <div style={{ display: 'flex', gap: '0.5rem' }}>
                                                 <button
                                                     onClick={() => setPendingAction({ type: s.isActive ? 'suspend' : 'activate', supervisor: s })}
@@ -176,7 +183,7 @@ export default function SupervisorManagement({ initialSupervisors, departments }
                                                     onClick={() => setPendingAction({ type: 'delete', supervisor: s })}
                                                     disabled={loadingId === s.id}
                                                     className="btn"
-                                                    style={{ padding: '0.25rem 0.625rem', fontSize: '0.75rem', color: '#ef4444', border: '1px solid #ef4444' }}
+                                                    style={{ padding: '0.25rem 0.625rem', fontSize: '0.75rem', color: 'var(--foreground)', border: '1px solid var(--foreground)' }}
                                                 >
                                                     Delete
                                                 </button>

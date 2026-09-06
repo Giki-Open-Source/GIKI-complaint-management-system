@@ -106,7 +106,7 @@ export default async function DepartmentDashboard({ searchParams }: { searchPara
                                             <span style={{
                                                 fontSize: '0.75rem',
                                                 padding: '0.125rem 0.5rem',
-                                                borderRadius: '4px',
+                                                borderRadius: 0,
                                                 backgroundColor: 'var(--secondary)',
                                                 color: 'var(--muted-foreground)',
                                                 border: '1px solid var(--border)'
@@ -128,17 +128,17 @@ export default async function DepartmentDashboard({ searchParams }: { searchPara
                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'center', gap: '0.5rem' }}>
                                         <div style={{ display: 'flex', gap: '0.375rem' }}>
                                             {complaint.isOverdue && (
-                                                <span style={{ padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.7rem', fontWeight: '700', backgroundColor: '#ef4444', color: 'white' }}>
+                                                <span style={{ padding: '0.25rem 0.75rem', borderRadius: 0, fontSize: '0.7rem', fontWeight: '700', backgroundColor: '#ef4444', color: 'white' }}>
                                                     OVERDUE
                                                 </span>
                                             )}
-                                            <span style={{ padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.7rem', fontWeight: '600', backgroundColor: getPriorityColor(complaint.priority), color: 'white' }}>
+                                            <span style={{ padding: '0.25rem 0.75rem', borderRadius: 0, fontSize: '0.7rem', fontWeight: '600', backgroundColor: getPriorityColor(complaint.priority), color: 'white' }}>
                                                 {complaint.priority}
                                             </span>
                                         </div>
                                         <span style={{
                                             padding: '0.25rem 0.75rem',
-                                            borderRadius: '9999px',
+                                            borderRadius: 0,
                                             fontSize: '0.75rem',
                                             fontWeight: '600',
                                             backgroundColor: getStatusColor(complaint.status),

@@ -1,6 +1,8 @@
 import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
 import { getUserFromToken } from '@/lib/auth'
 import Link from 'next/link'
+import AdminOverview from './admin-overview'
 
 export default async function DashboardPage() {
     const cookieStore = await cookies()
@@ -8,6 +10,16 @@ export default async function DashboardPage() {
     const user = token ? await getUserFromToken(token) : null
 
     if (!user) return null
+
+    if (user.role === 'ADMIN') {
+        return <AdminOverview name={user.name} />
+    }
+
+    // Supervisors work out of their department queue -- they don't file complaints,
+    // so the submit/track cards below don't apply to them.
+    if (user.role === 'DEPT_OFFICER') {
+        redirect('/dashboard/department')
+    }
 
     return (
         <div>

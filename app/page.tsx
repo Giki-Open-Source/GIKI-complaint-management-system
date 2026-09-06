@@ -21,7 +21,7 @@ export default function Home() {
           alt="GIKI logo"
           width={72}
           height={72}
-          style={{ borderRadius: '12px', marginBottom: '1.5rem' }}
+          style={{ borderRadius: 0, marginBottom: '1.5rem' }}
         />
         <h1 style={{
           fontSize: '3.5rem',

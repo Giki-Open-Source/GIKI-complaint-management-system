@@ -54,8 +54,8 @@ export default async function SupervisorsPage() {
 
     return (
         <div>
-            <h1 style={{ fontSize: '1.875rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>Supervisors</h1>
-            <p className="text-muted" style={{ marginBottom: '2rem' }}>
+            <h1 style={{ fontSize: '1.375rem', fontWeight: 'bold', marginBottom: '0.25rem' }}>Supervisors</h1>
+            <p className="text-muted text-sm" style={{ marginBottom: '1rem' }}>
                 Manage department / hostel supervisors, their assignments, and what they&apos;re allowed to do.
             </p>
             <SupervisorManagement initialSupervisors={supervisors as any} departments={departments as any} />

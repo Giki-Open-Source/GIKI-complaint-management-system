@@ -32,7 +32,7 @@ export default function DashboardControls() {
                             key={status}
                             onClick={() => handleFilter(status)}
                             className={`btn ${currentStatus === status ? 'btn-primary' : 'btn-outline'}`}
-                            style={{ fontSize: '0.75rem', padding: '0.25rem 0.75rem', borderRadius: '9999px' }}
+                            style={{ fontSize: '0.75rem', padding: '0.25rem 0.75rem', borderRadius: 0 }}
                         >
                             {status === 'ALL' ? 'All' : status.replace('_', ' ')}
                         </button>

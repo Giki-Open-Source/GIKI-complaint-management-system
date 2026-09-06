@@ -72,7 +72,7 @@
 .timelineDot {
     width: 10px;
     height: 10px;
-    border-radius: 50%;
+    border-radius: 0;
     margin-top: 3px;
     flex-shrink: 0;
 }

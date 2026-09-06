@@ -3,19 +3,14 @@ import Link from 'next/link'
 import { getUserFromToken } from '@/lib/auth'
 import { query } from '@/lib/db'
 import { Status } from '@/lib/enums'
+import {
+    buildHostelComplaintWhere,
+    HOSTEL_COMPLAINT_SELECT,
+    HOSTEL_COMPLAINT_FROM,
+    WORK_TYPES,
+} from '@/lib/hostel-filters'
+import ExportButtons from '../export-buttons'
 import styles from './hostels.module.css'
-
-const WORK_TYPES = [
-    'Plumbing',
-    'Electrical',
-    'Carpentry',
-    'HVAC / AC',
-    'Internet / Wi-Fi',
-    'Furniture',
-    'Housekeeping',
-    'Civil / Structural',
-    'Pest Control',
-]
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100]
 const DEFAULT_PAGE_SIZE = 25
@@ -47,63 +42,12 @@ export default async function HostelComplaintsPage({ searchParams }: { searchPar
     const pageSize = PAGE_SIZE_OPTIONS.includes(Number(sp.pageSize)) ? Number(sp.pageSize) : DEFAULT_PAGE_SIZE
     const page = Math.max(1, parseInt(sp.page || '1', 10) || 1)
 
-    // Always scoped to hostel departments -- this is the Hostel Complaints module.
-    const conditions: string[] = [`d."isHostel" = true`]
-    const values: unknown[] = []
-
-    if (sp.hostel) {
-        values.push(sp.hostel)
-        conditions.push(`d.id = $${values.length}`)
-    }
-
-    if (sp.supervisor) {
-        const { rows: officerRows } = await query('SELECT "departmentId" FROM "User" WHERE id = $1 AND role = $2', [sp.supervisor, 'DEPT_OFFICER'])
-        if (officerRows[0]?.departmentId) {
-            values.push(officerRows[0].departmentId)
-            conditions.push(`d.id = $${values.length}`)
-        } else {
-            // Supervisor not found / not tied to a hostel -- force an empty result rather than ignoring the filter.
-            conditions.push('1 = 0')
-        }
-    }
-
-    if (sp.status) {
-        values.push(sp.status)
-        conditions.push(`c.status = $${values.length}`)
-    }
-
-    if (sp.workType) {
-        values.push(`%${sp.workType}%`)
-        conditions.push(`(c.subcategory ILIKE $${values.length} OR c.category ILIKE $${values.length})`)
-    }
-
-    if (sp.regNo) {
-        values.push(`%${sp.regNo}%`)
-        conditions.push(`u."registrationNumber" ILIKE $${values.length}`)
-    }
-
-    if (sp.q) {
-        values.push(`%${sp.q}%`)
-        conditions.push(`(c.title ILIKE $${values.length} OR c.description ILIKE $${values.length} OR c.subcategory ILIKE $${values.length})`)
-    }
-
-    if (sp.from) {
-        values.push(sp.from)
-        conditions.push(`c."createdAt" >= $${values.length}::date`)
-    }
-
-    if (sp.to) {
-        values.push(sp.to)
-        conditions.push(`c."createdAt" < ($${values.length}::date + interval '1 day')`)
-    }
-
-    const whereSql = `WHERE ${conditions.join(' AND ')}`
+    // Shared with the export routes so a download always matches what's on screen.
+    const { whereSql, values } = await buildHostelComplaintWhere(sp)
 
     const { rows: countRows } = await query(
         `SELECT COUNT(*)::int AS count
-         FROM "Complaint" c
-         JOIN "User" u ON u.id = c."complainantId"
-         JOIN "Department" d ON d.id = c."assignedDeptId"
+         ${HOSTEL_COMPLAINT_FROM}
          ${whereSql}`,
         values
     )
@@ -113,25 +57,8 @@ export default async function HostelComplaintsPage({ searchParams }: { searchPar
     const offset = (currentPage - 1) * pageSize
 
     const { rows: complaints } = await query(
-        `SELECT
-            c.id,
-            c.title,
-            c.subcategory,
-            c.category,
-            c.status,
-            c.priority,
-            c."createdAt",
-            u.name AS "studentName",
-            u."registrationNumber",
-            u."roomNumber",
-            d.id AS "hostelId",
-            d.name AS "hostelName",
-            (SELECT string_agg(o.name, ', ' ORDER BY o.name)
-             FROM "User" o
-             WHERE o."departmentId" = d.id AND o.role = 'DEPT_OFFICER') AS "supervisorNames"
-         FROM "Complaint" c
-         JOIN "User" u ON u.id = c."complainantId"
-         JOIN "Department" d ON d.id = c."assignedDeptId"
+        `SELECT ${HOSTEL_COMPLAINT_SELECT}
+         ${HOSTEL_COMPLAINT_FROM}
          ${whereSql}
          ORDER BY c."createdAt" DESC
          LIMIT $${values.length + 1} OFFSET $${values.length + 2}`,
@@ -248,6 +175,25 @@ export default async function HostelComplaintsPage({ searchParams }: { searchPar
                         <button type="submit" className={styles.btnErp}>Search</button>
                     </div>
                 </form>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '11px', color: '#9aa0aa' }}>
+                    Exports apply the criteria above and cover all {totalRecords} matching record(s), not just this page.
+                </span>
+                <ExportButtons
+                    endpoint="/api/export/complaints"
+                    params={{
+                        hostel: sp.hostel,
+                        supervisor: sp.supervisor,
+                        status: sp.status,
+                        workType: sp.workType,
+                        regNo: sp.regNo,
+                        q: sp.q,
+                        from: sp.from,
+                        to: sp.to,
+                    }}
+                />
             </div>
 
             <div className={styles.tableWrap}>
