@@ -5,7 +5,7 @@ import { cookies } from 'next/headers'
 import { getUserFromToken } from '@/lib/auth'
 import { query } from '@/lib/db'
 import { isProfileComplete } from '@/lib/profile'
-import { UserCircle } from 'lucide-react'
+import { UserCircle, LayoutDashboard, FilePlus2, ClipboardList, Inbox, ShieldCheck, Users, BarChart3 } from 'lucide-react'
 import styles from './dashboard.module.css'
 import DashboardLayoutClient from './layout-client'
 import SignOutButton from './sign-out-button'
@@ -32,7 +32,10 @@ export default async function DashboardLayout({ children }: { children: ReactNod
                 GIKomplain
             </div>
             <nav className={styles.nav}>
-                <Link href="/dashboard" className={styles.navItem}>Overview</Link>
+                <Link href="/dashboard" className={styles.navItem}>
+                    <LayoutDashboard size={18} />
+                    Overview
+                </Link>
                 <Link href="/dashboard/profile" className={styles.navItem} style={{ position: 'relative' }}>
                     <UserCircle size={18} />
                     My Profile
@@ -43,20 +46,38 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
                 {user.role === 'STUDENT' || user.role === 'FACULTY' || user.role === 'STAFF' ? (
                     <>
-                        <Link href="/dashboard/submit" className={styles.navItem}>Submit Complaint</Link>
-                        <Link href="/dashboard/my-complaints" className={styles.navItem}>My Complaints</Link>
+                        <Link href="/dashboard/submit" className={styles.navItem}>
+                            <FilePlus2 size={18} />
+                            Submit Complaint
+                        </Link>
+                        <Link href="/dashboard/my-complaints" className={styles.navItem}>
+                            <ClipboardList size={18} />
+                            My Complaints
+                        </Link>
                     </>
                 ) : null}
 
                 {user.role === 'DEPT_OFFICER' || user.role === 'ADMIN' ? (
-                    <Link href="/dashboard/department" className={styles.navItem}>Department Queue</Link>
+                    <Link href="/dashboard/department" className={styles.navItem}>
+                        <Inbox size={18} />
+                        Department Queue
+                    </Link>
                 ) : null}
 
                 {user.role === 'ADMIN' && (
                     <>
-                        <Link href="/dashboard/admin" className={styles.navItem}>Admin Console</Link>
-                        <Link href="/dashboard/admin/users" className={styles.navItem}>Manage Users</Link>
-                        <Link href="/dashboard/admin/reports" className={styles.navItem}>Reports</Link>
+                        <Link href="/dashboard/admin" className={styles.navItem}>
+                            <ShieldCheck size={18} />
+                            Admin Console
+                        </Link>
+                        <Link href="/dashboard/admin/users" className={styles.navItem}>
+                            <Users size={18} />
+                            Manage Users
+                        </Link>
+                        <Link href="/dashboard/admin/reports" className={styles.navItem}>
+                            <BarChart3 size={18} />
+                            Reports
+                        </Link>
                     </>
                 )}
                 <div style={{ marginTop: 'auto' }}>
