@@ -1,9 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
+
+interface DepartmentOption {
+    id: string
+    categoryLabel: string | null
+    name: string
+}
 
 export default function RegisterPage() {
     const [step, setStep] = useState<'form' | 'otp'>('form')
@@ -11,11 +17,19 @@ export default function RegisterPage() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [role, setRole] = useState('STUDENT')
+    const [departmentId, setDepartmentId] = useState('')
+    const [departments, setDepartments] = useState<DepartmentOption[]>([])
     const [code, setCode] = useState('')
     const [error, setError] = useState('')
     const [info, setInfo] = useState('')
     const [loading, setLoading] = useState(false)
     const router = useRouter()
+
+    useEffect(() => {
+        fetch('/api/departments')
+            .then(res => res.json())
+            .then(data => setDepartments(data.departments || []))
+    }, [])
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -26,7 +40,10 @@ export default function RegisterPage() {
             const res = await fetch('/api/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, password, role }),
+                body: JSON.stringify({
+                    name, email, password, role,
+                    departmentId: role === 'DEPT_OFFICER' ? departmentId : undefined,
+                }),
             })
 
             const data = await res.json()
@@ -213,6 +230,24 @@ export default function RegisterPage() {
                                 <option value="DEPT_OFFICER">Department Officer</option>
                             </select>
                         </div>
+
+                        {role === 'DEPT_OFFICER' && (
+                            <div>
+                                <label htmlFor="departmentId" style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', marginBottom: '0.5rem', color: 'var(--foreground)' }}>Department</label>
+                                <select
+                                    id="departmentId"
+                                    value={departmentId}
+                                    onChange={(e) => setDepartmentId(e.target.value)}
+                                    required
+                                    className="input"
+                                >
+                                    <option value="">Select your department</option>
+                                    {departments.map(dept => (
+                                        <option key={dept.id} value={dept.id}>{dept.categoryLabel || dept.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
 
                         <button
                             type="submit"
