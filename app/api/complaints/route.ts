@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { pool, query } from '@/lib/db'
 import { getUserFromToken } from '@/lib/auth'
+import { isProfileComplete, getMissingProfileFields, getProfileFieldLabels } from '@/lib/profile'
 import { cookies } from 'next/headers'
 import { randomUUID } from 'crypto'
 import { z } from 'zod'
@@ -53,6 +54,17 @@ export async function POST(request: Request) {
 
     if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { rows: profileRows } = await query(
+        `SELECT "registrationNumber", "hostelName", "roomNumber", "major" FROM "User" WHERE id = $1`,
+        [user.id]
+    )
+    const profile = { ...profileRows[0], role: user.role }
+    if (!isProfileComplete(profile)) {
+        const labels = getProfileFieldLabels(user.role)
+        const missing = getMissingProfileFields(profile).map(f => labels[f])
+        return NextResponse.json({ error: `Please complete your profile first: ${missing.join(', ')}` }, { status: 400 })
     }
 
     try {

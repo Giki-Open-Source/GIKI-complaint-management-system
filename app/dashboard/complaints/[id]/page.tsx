@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers'
 import { getUserFromToken } from '@/lib/auth'
 import { query } from '@/lib/db'
+import { getProfileFieldLabels } from '@/lib/profile'
 import ComplaintActions from './actions'
 import CommentsSection from './comments'
 import Link from 'next/link'
@@ -18,6 +19,11 @@ export default async function ComplaintDetailsPage({ params }: { params: Promise
     const { rows: complaintRows } = await query(
         `SELECT c.*,
                 cu.name AS "complainantName",
+                cu.role AS "complainantRole",
+                cu."registrationNumber" AS "complainantRegistrationNumber",
+                cu."hostelName" AS "complainantHostelName",
+                cu."roomNumber" AS "complainantRoomNumber",
+                cu."major" AS "complainantMajor",
                 officer.name AS "assignedOfficerName",
                 d.name AS "assignedDeptName",
                 d."slaHours" AS "deptSlaHours",
@@ -161,6 +167,25 @@ export default async function ComplaintDetailsPage({ params }: { params: Promise
                         <div style={{ color: 'var(--muted-foreground)', marginBottom: '0.25rem' }}>Assigned Department</div>
                         <div style={{ fontWeight: '500' }}>{complaint.assignedDept?.name || 'Pending Assignment'}</div>
                     </div>
+                    {(complaintRow.complainantHostelName || complaintRow.complainantRoomNumber) && (
+                        <div>
+                            <div style={{ color: 'var(--muted-foreground)', marginBottom: '0.25rem' }}>
+                                {getProfileFieldLabels(complaintRow.complainantRole).hostelName}
+                                {complaintRow.complainantRoomNumber ? ` / ${getProfileFieldLabels(complaintRow.complainantRole).roomNumber}` : ''}
+                            </div>
+                            <div style={{ fontWeight: '500' }}>
+                                {[complaintRow.complainantHostelName, complaintRow.complainantRoomNumber].filter(Boolean).join(' — ')}
+                            </div>
+                        </div>
+                    )}
+                    {complaintRow.complainantRegistrationNumber && (
+                        <div>
+                            <div style={{ color: 'var(--muted-foreground)', marginBottom: '0.25rem' }}>
+                                {getProfileFieldLabels(complaintRow.complainantRole).registrationNumber}
+                            </div>
+                            <div style={{ fontWeight: '500' }}>{complaintRow.complainantRegistrationNumber}</div>
+                        </div>
+                    )}
                     {complaint.assignedOfficer && (
                         <div>
                             <div style={{ color: 'var(--muted-foreground)', marginBottom: '0.25rem' }}>Assigned Officer</div>
