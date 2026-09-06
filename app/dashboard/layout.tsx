@@ -5,7 +5,7 @@ import { cookies } from 'next/headers'
 import { getUserFromToken } from '@/lib/auth'
 import { query } from '@/lib/db'
 import { isProfileComplete } from '@/lib/profile'
-import { UserCircle, LayoutDashboard, FilePlus2, ClipboardList, Inbox, ShieldCheck, Users, BarChart3 } from 'lucide-react'
+import { UserCircle, LayoutDashboard, FilePlus2, ClipboardList, Inbox, ShieldCheck, Users, BarChart3, Settings } from 'lucide-react'
 import styles from './dashboard.module.css'
 import DashboardLayoutClient from './layout-client'
 import SignOutButton from './sign-out-button'
@@ -81,6 +81,10 @@ export default async function DashboardLayout({ children }: { children: ReactNod
                     </>
                 )}
                 <div style={{ marginTop: 'auto' }}>
+                    <Link href="/dashboard/settings" className={styles.navItem}>
+                        <Settings size={18} />
+                        Settings
+                    </Link>
                     <SignOutButton />
                 </div>
             </nav>
