@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { query } from '@/lib/db'
-import { getUserFromToken } from '@/lib/auth'
+import { getUserFromToken, comparePassword } from '@/lib/auth'
 import { cookies } from 'next/headers'
 import { z } from 'zod'
 
@@ -64,6 +64,52 @@ export async function PATCH(request: Request) {
     } catch (error) {
         if (error instanceof z.ZodError) {
             return NextResponse.json({ error: error.issues }, { status: 400 })
+        }
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    }
+}
+
+const deleteSchema = z.object({
+    password: z.string().min(1),
+})
+
+export async function DELETE(request: Request) {
+    const cookieStore = await cookies()
+    const token = cookieStore.get('token')?.value
+    const user = token ? await getUserFromToken(token) : null
+
+    if (!user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    if (user.role === 'ADMIN') {
+        return NextResponse.json({ error: 'Admin accounts cannot be self-deleted. Ask another admin to remove it via Manage Users.' }, { status: 400 })
+    }
+
+    try {
+        const body = await request.json()
+        const { password } = deleteSchema.parse(body)
+
+        const { rows } = await query('SELECT password FROM "User" WHERE id = $1', [user.id])
+        const isValid = rows[0] && await comparePassword(password, rows[0].password)
+
+        if (!isValid) {
+            return NextResponse.json({ error: 'Incorrect password' }, { status: 400 })
+        }
+
+        await query('DELETE FROM "User" WHERE id = $1', [user.id])
+
+        const response = NextResponse.json({ success: true })
+        response.cookies.delete('token')
+        return response
+    } catch (error) {
+        if (error instanceof z.ZodError) {
+            return NextResponse.json({ error: error.issues }, { status: 400 })
+        }
+        if ((error as { code?: string }).code === '23503') {
+            return NextResponse.json({
+                error: 'Your account has existing complaints, comments, or activity on file and cannot be deleted directly. Please contact an admin.'
+            }, { status: 400 })
         }
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
     }
